@@ -11,8 +11,19 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3502;
 
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',').map((o) => o.trim())
+  : ['http://localhost:5175'];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5175',
+  origin: (origin, callback) => {
+    // Permitir requests sin origin (apps móviles, Postman, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error('CORS: origen no permitido'));
+  },
   credentials: true,
 }));
 
