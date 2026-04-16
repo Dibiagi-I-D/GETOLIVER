@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminView.css';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 const EMPRESAS = [
   { value: 'FP',     label: 'FP' },
   { value: 'MULTIM', label: 'MULTIMODAL' },
@@ -37,7 +39,7 @@ function AdminView() {
   const cargarPedidos = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`/api/admin/pedidos?empresa=${empresa}`);
+      const res = await axios.get(`${API_BASE}/api/admin/pedidos?empresa=${empresa}`);
       if (res.data.success) setPedidos(res.data.pedidos);
     } catch (err) {
       console.error('Error al cargar pedidos:', err);
@@ -55,7 +57,7 @@ function AdminView() {
     setConfirm(null);
     setEntregando(nrofor);
     try {
-      const res = await axios.post('/api/admin/marcar-entregado', { nrofor, empresa });
+      const res = await axios.post(`${API_BASE}/api/admin/marcar-entregado`, { nrofor, empresa });
       if (res.data.success) {
         setPedidos((prev) =>
           prev.map((p) => p.nrofor === nrofor ? { ...p, status: 'E' } : p)

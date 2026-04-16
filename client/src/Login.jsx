@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Login.css';
+
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const EMPRESAS = [
   { value: 'FP', label: 'FP' },
@@ -41,7 +43,7 @@ function Login({ onLogin }) {
 
     try {
       const response = await axios.get(
-        `/api/aceite/validar-legajo?legajo=${legajoLimpio}&empresa=${empresaInput}`
+        `${API_BASE}/api/aceite/validar-legajo?legajo=${legajoLimpio}&empresa=${empresaInput}`
       );
 
       if (response.data.success) {

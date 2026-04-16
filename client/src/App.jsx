@@ -7,7 +7,8 @@ import AdminView from './AdminView';
 // Legajos con acceso al panel de administración
 const ADMIN_LEGAJOS = [13];
 
-const API_URL = '/api/aceite';
+const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_URL = `${API_BASE}/api/aceite`;
 
 const TIPOS_ACEITE = [
   { tipo: 'Aceite de Oliva Blend Clasico 0,25 lts.',       precio: 4550 },
