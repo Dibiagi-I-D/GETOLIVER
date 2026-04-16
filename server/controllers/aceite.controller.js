@@ -1,6 +1,6 @@
 import { getConnection } from '../config/database.js';
 
-// Precios por producto (en pesos)
+// Precios por producto (en pesos)...
 const PRECIOS = {
   'Aceite de Oliva Blend Clasico 0,25 lts.':      4550.00,
   'Aceite de Oliva Blend Clasico 0,5 lts.':       7210.00,
