@@ -4,7 +4,7 @@ import axios from 'axios';
 import './App.css';
 import Login from './Login';
 import AdminView from './AdminView';
-import fondoDesktop from '../assets/fondo de pantalla de desktop.png';
+import fondoDesktop from '../assets/fondo-desktop.webp';
 
 const ADMIN_LEGAJOS = [13];
 

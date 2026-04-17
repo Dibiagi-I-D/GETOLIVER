@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Login.css';
-import fondoDesktop from '../assets/fondo de pantalla de desktop.png';
+import fondoDesktop from '../assets/fondo-desktop.webp';
 import fondoMobile from '../assets/fondo de pantalla responsivo.jpeg';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -31,6 +31,10 @@ function Login({ onLogin }) {
         empresa: empresaGuardada || 'FP',
       });
     }
+
+    // Precargar el fondo del app principal mientras el usuario está en login
+    const img = new Image();
+    img.src = fondoDesktop;
   }, []);
 
   const validarYEntrar = async (legajoInput, empresaInput) => {
