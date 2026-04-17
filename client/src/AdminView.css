@@ -113,6 +113,15 @@
 }
 .pedido-total { font-size: 13px; font-weight: 700; color: var(--gold-light); font-family: "Playfair Display", serif; }
 .pedido-total span { font-weight: 400; color: var(--text-faint); font-size: 11px; margin-right: 4px; font-family: "Inter", sans-serif; }
+.pedido-card-actions { display: flex; align-items: center; gap: 6px; }
+.btn-pdf-individual {
+  padding: 7px 11px;
+  background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.35);
+  color: var(--gold-light); border-radius: 7px; font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; font-family: "Inter", sans-serif;
+  white-space: nowrap;
+}
+.btn-pdf-individual:hover { background: rgba(201,168,76,0.22); transform: translateY(-1px); }
 .btn-entregar {
   padding: 8px 14px;
   background: linear-gradient(135deg, rgba(74,124,35,0.7), rgba(45,80,22,0.85));
@@ -122,6 +131,26 @@
 .btn-entregar:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(45,80,22,0.4); }
 .btn-entregar:disabled { opacity: 0.5; cursor: not-allowed; }
 .entregado-label { font-size: 12px; color: #9ddc6a; font-weight: 600; }
+
+/* BARRA DE ACCIONES PARA PENDIENTES */
+.admin-acciones-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-bottom: 12px; padding: 10px 16px;
+  background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.25);
+  border-radius: var(--radius-sm); backdrop-filter: blur(12px);
+}
+.admin-acciones-info {
+  font-size: 12px; font-weight: 600; color: var(--text-faint);
+}
+.btn-descargar-todos {
+  padding: 8px 18px;
+  background: linear-gradient(135deg, rgba(74,124,35,0.75), rgba(45,80,22,0.9));
+  border: 1px solid rgba(107,142,35,0.5); color: var(--text);
+  border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: all 0.2s; font-family: "Inter", sans-serif; white-space: nowrap;
+}
+.btn-descargar-todos:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(45,80,22,0.45); }
+.btn-descargar-todos:disabled { opacity: 0.55; cursor: not-allowed; }
 
 /* MODAL COMPROBANTE */
 .modal-comprobante {
@@ -171,15 +200,24 @@
 .comprobante-total span { color: var(--text-dim); }
 .comprobante-total strong { font-size: 18px; font-weight: 700; color: var(--gold-light); font-family: "Playfair Display", serif; }
 .comprobante-footer {
-  padding: 14px 22px 18px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: center;
+  padding: 14px 22px 18px; border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; justify-content: center; gap: 10px;
 }
 .btn-cerrar-comprobante {
-  padding: 11px 48px;
-  background: linear-gradient(135deg, rgba(74,124,35,0.8), rgba(45,80,22,0.9));
-  border: 1px solid var(--green-border); color: var(--text);
+  padding: 11px 28px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15); color: var(--text-dim);
   border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: "Inter", sans-serif;
 }
-.btn-cerrar-comprobante:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(45,80,22,0.4); }
+.btn-cerrar-comprobante:hover { background: rgba(255,255,255,0.05); }
+.btn-descargar-pdf {
+  padding: 11px 22px;
+  background: linear-gradient(135deg, rgba(74,124,35,0.8), rgba(45,80,22,0.9));
+  border: 1px solid rgba(107,142,35,0.45); color: var(--text);
+  border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: "Inter", sans-serif;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-descargar-pdf:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(45,80,22,0.4); }
 
 /* MODAL CONFIRMAR */
 .modal-confirm {
