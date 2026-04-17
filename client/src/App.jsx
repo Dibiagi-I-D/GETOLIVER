@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import './App.css';
 import Login from './Login';
 import AdminView from './AdminView';
+import fondoDesktop from '../assets/fondo de pantalla de desktop.png';
 
 const ADMIN_LEGAJOS = [13];
 
@@ -254,7 +256,7 @@ function App() {
   }, 0);
 
   return (
-    <div className="app">
+    <div className="app" style={{ '--app-bg': `url(${fondoDesktop})` }}>
       <div className="container">
 
         {/* HEADER */}
@@ -292,97 +294,98 @@ function App() {
         </header>
 
         {/* ── MODAL CANTIDAD ── */}
-        {modalCantidad && (
-          <div className="modal-overlay" onClick={() => setModalCantidad(null)}>
-            <div className="modal-cantidad" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-cantidad-header">
-                <span className="modal-cantidad-icon">🫒</span>
-                <h3>Cantidad</h3>
-                <button className="btn-modal-x" onClick={() => setModalCantidad(null)}>✕</button>
-              </div>
-              <p className="modal-cantidad-producto">{modalCantidad.tipo}</p>
-              <p className="modal-cantidad-precio">
-                {formatPrecio(preciosActivos[modalCantidad.tipo] ?? 0)} c/u
-              </p>
-              <div className="cantidad-control">
-                <button
-                  type="button"
-                  className="btn-qty"
-                  onClick={() => setCantidadInput((v) => Math.max(1, parseInt(v || 1) - 1))}
-                >−</button>
-                <input
-                  ref={cantidadRef}
-                  type="number"
-                  min="1"
-                  value={cantidadInput}
-                  onChange={(e) => setCantidadInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && confirmarCantidad()}
-                  className="qty-input"
-                />
-                <button
-                  type="button"
-                  className="btn-qty"
-                  onClick={() => setCantidadInput((v) => parseInt(v || 1) + 1)}
-                >+</button>
-              </div>
-              <div className="modal-cantidad-actions">
-                <button type="button" className="btn-cancelar-qty" onClick={() => setModalCantidad(null)}>
-                  Cancelar
-                </button>
-                <button type="button" className="btn-agregar-qty" onClick={confirmarCantidad}>
-                  {carrito.find((p) => p.tipo === modalCantidad.tipo) ? 'Actualizar' : 'Agregar al pedido'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {modalCantidad && (
+            <motion.div className="modal-overlay" onClick={() => setModalCantidad(null)}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
+              <motion.div className="modal-cantidad" onClick={(e) => e.stopPropagation()}
+                initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0 }} transition={{ duration: 0.2 }}>
+                <div className="modal-cantidad-header">
+                  <span className="modal-cantidad-icon">🫒</span>
+                  <h3>Cantidad</h3>
+                  <button className="btn-modal-x" onClick={() => setModalCantidad(null)}>✕</button>
+                </div>
+                <p className="modal-cantidad-producto">{modalCantidad.tipo}</p>
+                <p className="modal-cantidad-precio">
+                  {formatPrecio(preciosActivos[modalCantidad.tipo] ?? 0)} c/u
+                </p>
+                <div className="cantidad-control">
+                  <button type="button" className="btn-qty"
+                    onClick={() => setCantidadInput((v) => Math.max(1, parseInt(v || 1) - 1))}>−</button>
+                  <input
+                    ref={cantidadRef}
+                    type="number" min="1" value={cantidadInput}
+                    onChange={(e) => setCantidadInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && confirmarCantidad()}
+                    className="qty-input"
+                  />
+                  <button type="button" className="btn-qty"
+                    onClick={() => setCantidadInput((v) => parseInt(v || 1) + 1)}>+</button>
+                </div>
+                <div className="modal-cantidad-actions">
+                  <button type="button" className="btn-cancelar-qty" onClick={() => setModalCantidad(null)}>
+                    Cancelar
+                  </button>
+                  <button type="button" className="btn-agregar-qty" onClick={confirmarCantidad}>
+                    {carrito.find((p) => p.tipo === modalCantidad.tipo) ? 'Actualizar' : 'Agregar al pedido'}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ── MODAL RESULTADO ── */}
-        {modal && (
-          <div className="modal-overlay">
-            <div className={`modal-box ${modal.type}`}>
-              <div className="modal-top">
-                <span className="modal-icon">{modal.icon}</span>
-                <h3>{modal.title}</h3>
-                <p>{modal.message}</p>
-              </div>
-
-              {modal.detail && (
-                <div className="modal-detail">
-                  <div className="modal-detail-row">
-                    <span>N° Formulario</span>
-                    <strong>{modal.detail.nrofor}</strong>
-                  </div>
-                  <div className="modal-detail-row">
-                    <span>Legajo</span>
-                    <strong>{modal.detail.legajo} — {modal.detail.nombre}</strong>
-                  </div>
-                  <div className="modal-detail-row">
-                    <span>Empresa</span>
-                    <strong>{modal.detail.empresa}</strong>
-                  </div>
-                  <div className="modal-detail-row">
-                    <span>Método de pago</span>
-                    <strong>
-                      {modal.detail.metodoPago === 'bono' ? 'Por Bono' : 'Empleado (efectivo/transferencia)'}
-                    </strong>
-                  </div>
-
-                  {modal.detail.productos && modal.detail.productos.map((p, i) => (
-                    <div key={i} className="modal-detail-row modal-producto-row">
-                      <span>🫒 {p.tipo}</span>
-                      <strong>×{p.cantidad}</strong>
-                    </div>
-                  ))}
+        <AnimatePresence>
+          {modal && (
+            <motion.div className="modal-overlay"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
+              <motion.div className={`modal-box ${modal.type}`}
+                initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0 }} transition={{ duration: 0.2 }}>
+                <div className="modal-top">
+                  <span className="modal-icon">{modal.icon}</span>
+                  <h3>{modal.title}</h3>
+                  <p>{modal.message}</p>
                 </div>
-              )}
 
-              <div className="modal-actions">
-                <button className="btn-modal-close" onClick={() => setModal(null)}>Aceptar</button>
-              </div>
-            </div>
-          </div>
-        )}
+                {modal.detail && (
+                  <div className="modal-detail">
+                    <div className="modal-detail-row">
+                      <span>N° Formulario</span>
+                      <strong>{modal.detail.nrofor}</strong>
+                    </div>
+                    <div className="modal-detail-row">
+                      <span>Legajo</span>
+                      <strong>{modal.detail.legajo} — {modal.detail.nombre}</strong>
+                    </div>
+                    <div className="modal-detail-row">
+                      <span>Empresa</span>
+                      <strong>{modal.detail.empresa}</strong>
+                    </div>
+                    <div className="modal-detail-row">
+                      <span>Método de pago</span>
+                      <strong>
+                        {modal.detail.metodoPago === 'bono' ? 'Por Bono' : 'Empleado (efectivo/transferencia)'}
+                      </strong>
+                    </div>
+                    {modal.detail.productos && modal.detail.productos.map((p, i) => (
+                      <div key={i} className="modal-detail-row modal-producto-row">
+                        <span>🫒 {p.tipo}</span>
+                        <strong>×{p.cantidad}</strong>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="modal-actions">
+                  <button className="btn-modal-close" onClick={() => setModal(null)}>Aceptar</button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* VISTA ADMIN */}
         {esAdmin && modoAdmin && (
@@ -397,7 +400,8 @@ function App() {
             <form onSubmit={handleSubmit}>
 
               {/* EMPRESA */}
-              <div className="form-section">
+              <motion.div className="form-section"
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
                 <div className="section-title"><span>🏢</span> Empresa y legajo</div>
                 <div className="form-row">
                   <div className="form-group">
@@ -416,10 +420,11 @@ function App() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* MÉTODO DE PAGO */}
-              <div className="form-section">
+              <motion.div className="form-section"
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                 <div className="section-title"><span>💳</span> Método de pago</div>
                 <div className="metodo-pago-grid">
                   {METODOS_PAGO.map(({ value, label, desc }) => (
@@ -434,17 +439,17 @@ function App() {
                     </button>
                   ))}
                 </div>
-              </div>
+              </motion.div>
 
               {/* PRODUCTOS */}
-              <div className="form-section">
+              <motion.div className="form-section"
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
                 <div className="section-title">
                   <span>🫒</span> Productos
                   {carrito.length > 0 && (
                     <span className="carrito-badge">{totalProductos} unid. seleccionadas</span>
                   )}
                 </div>
-
                 <div className="productos-grid">
                   {tiposAceite.map(({ tipo, precio }) => {
                     const enCarrito = carrito.find((p) => p.tipo === tipo);
@@ -469,57 +474,54 @@ function App() {
                     );
                   })}
                 </div>
-              </div>
+              </motion.div>
 
               {/* CARRITO */}
-              {carrito.length > 0 && (
-                <div className="carrito-section">
-                  <div className="section-title">
-                    <span>🛒</span> Mi pedido ({carrito.length} producto{carrito.length > 1 ? 's' : ''})
-                  </div>
-                  <div className="carrito-lista">
-                    {carrito.map((item) => {
-                      const precio = preciosActivos[item.tipo] ?? 0;
-                      const subtotal = precio * item.cantidad;
-                      return (
-                        <div key={item.tipo} className="carrito-item">
-                          <div className="carrito-item-info">
-                            <span className="carrito-item-nombre">🫒 {item.tipo}</span>
-                            <span className="carrito-item-subtotal">
-                              {formatPrecio(precio)} × {item.cantidad} = <strong>{formatPrecio(subtotal)}</strong>
-                            </span>
-                          </div>
-                          <div className="carrito-item-actions">
-                            <button
-                              type="button"
-                              className="btn-edit-qty"
-                              onClick={() => abrirModalCantidad(item.tipo)}
-                              title="Editar cantidad"
-                            >
-                              ×{item.cantidad}
-                            </button>
-                            <button
-                              type="button"
-                              className="btn-quitar"
-                              onClick={() => quitarDelCarrito(item.tipo)}
-                              title="Quitar"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="carrito-total">
-                    <span>Total del pedido</span>
-                    <strong>{formatPrecio(totalImporte)}</strong>
-                  </div>
-                </div>
-              )}
+              <AnimatePresence>
+                {carrito.length > 0 && (
+                  <motion.div className="carrito-section"
+                    initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.22 }}>
+                    <div className="section-title">
+                      <span>🛒</span> Mi pedido ({carrito.length} producto{carrito.length > 1 ? 's' : ''})
+                    </div>
+                    <div className="carrito-lista">
+                      {carrito.map((item) => {
+                        const precio = preciosActivos[item.tipo] ?? 0;
+                        const subtotal = precio * item.cantidad;
+                        return (
+                          <motion.div key={item.tipo} className="carrito-item"
+                            initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 10 }} layout>
+                            <div className="carrito-item-info">
+                              <span className="carrito-item-nombre">🫒 {item.tipo}</span>
+                              <span className="carrito-item-subtotal">
+                                {formatPrecio(precio)} × {item.cantidad} = <strong>{formatPrecio(subtotal)}</strong>
+                              </span>
+                            </div>
+                            <div className="carrito-item-actions">
+                              <button type="button" className="btn-edit-qty"
+                                onClick={() => abrirModalCantidad(item.tipo)}>
+                                ×{item.cantidad}
+                              </button>
+                              <button type="button" className="btn-quitar"
+                                onClick={() => quitarDelCarrito(item.tipo)}>✕</button>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                    <div className="carrito-total">
+                      <span>Total del pedido</span>
+                      <strong>{formatPrecio(totalImporte)}</strong>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* SUBMIT */}
-              <div className="submit-section">
+              <motion.div className="submit-section"
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                 <button
                   type="submit"
                   className="btn-submit"
@@ -531,7 +533,7 @@ function App() {
                     `🫒 Confirmar pedido${carrito.length > 0 ? ` (${carrito.length} producto${carrito.length > 1 ? 's' : ''})` : ''}`
                   )}
                 </button>
-              </div>
+              </motion.div>
 
             </form>
           </div>
