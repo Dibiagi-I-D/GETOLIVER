@@ -4,47 +4,102 @@ import './App.css';
 import Login from './Login';
 import AdminView from './AdminView';
 
-// Legajos con acceso al panel de administración
 const ADMIN_LEGAJOS = [13];
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 const API_URL = `${API_BASE}/api/aceite`;
 
-const TIPOS_ACEITE = [
-  { tipo: 'Aceite de Oliva Blend Clasico 0,25 lts.',       precio: 4550 },
-  { tipo: 'Aceite de Oliva Blend Clasico 0,5 lts.',        precio: 7210 },
-  { tipo: 'Aceite de Oliva Blend Clasico 1 lts.',          precio: 13300 },
-  { tipo: 'Aceite de Oliva Blend Clasico 3 lts.',          precio: 18000 },
-  { tipo: 'Aceite de Oliva Blend Clasico 5 lts.',          precio: 25000 },
-  { tipo: 'Aceite de Oliva Blend Intenso 0,25 lts.',       precio: 4550 },
-  { tipo: 'Aceite de Oliva Blend Intenso 0,5 lts.',        precio: 7210 },
-  { tipo: 'Aceite de Oliva Blend Intenso 1 lts.',          precio: 13300 },
-  { tipo: 'Aceite de Oliva Blend Intenso 3 lts.',          precio: 18000 },
-  { tipo: 'Aceite de Oliva Blend Intenso 5 lts.',          precio: 25000 },
-  { tipo: 'Aceite de Oliva Cosecha Nocturna 0,25 lts.',    precio: 4550 },
-  { tipo: 'Aceite de Oliva Cosecha Nocturna 0,50 lts.',    precio: 7210 },
-  { tipo: 'Aceite de Oliva bidón 3 lts sin etiqueta',      precio: 18000 },
-  { tipo: 'Aceite de Oliva bidón 5 lts sin etiqueta',      precio: 25000 },
-  { tipo: 'Aceite de Oliva virgen extra Blend 0,5 lts.',   precio: 7210 },
+// Lista base de productos (sin precio, se asigna según método de pago)
+const TIPOS_ACEITE_BASE = [
+  { tipo: 'Oliver Cooks AOVE Clásico - Vidrio 250cc' },
+  { tipo: 'Oliver Cooks AOVE Clásico - Vidrio 250cc (Caja x12)' },
+  { tipo: 'Oliver Cooks AOVE Intenso - Vidrio 250cc' },
+  { tipo: 'Oliver Cooks AOVE Intenso - Vidrio 250cc (Caja x12)' },
+  { tipo: 'Oliver Cooks AOVE Clásico - Vidrio 500cc' },
+  { tipo: 'Oliver Cooks AOVE Clásico - Vidrio 500cc (Caja x6)' },
+  { tipo: 'Oliver Cooks AOVE Intenso - Vidrio 500cc' },
+  { tipo: 'Oliver Cooks AOVE Intenso - Vidrio 500cc (Caja x6)' },
+  { tipo: 'Oliver Cooks AOVE Clásico - Pet 1000cc' },
+  { tipo: 'Oliver Cooks AOVE Clásico - Pet 1000cc (Caja x6)' },
+  { tipo: 'Oliver Cooks AOVE Intenso - Pet 1000cc' },
+  { tipo: 'Oliver Cooks AOVE Intenso - Pet 1000cc (Caja x6)' },
+  { tipo: 'Oliver Cooks AOVE Clásico - Pet 3000cc' },
+  { tipo: 'Oliver Cooks AOVE Clásico - Pet 3000cc (Caja x4)' },
+  { tipo: 'Oliver Cooks AOVE Intenso - Pet 3000cc' },
+  { tipo: 'Oliver Cooks AOVE Intenso - Pet 3000cc (Caja x4)' },
+  { tipo: 'Oliver Cooks AOVE Clásico - Pet 5000cc' },
+  { tipo: 'Oliver Cooks AOVE Clásico - Pet 5000cc (Caja x2)' },
+  { tipo: 'Oliver Cooks AOVE Intenso - Pet 5000cc' },
+  { tipo: 'Oliver Cooks AOVE Intenso - Pet 5000cc (Caja x2)' },
+];
+
+const PRECIOS_POR_METODO = {
+  empleado: {
+    'Oliver Cooks AOVE Clásico - Vidrio 250cc':              4700,
+    'Oliver Cooks AOVE Clásico - Vidrio 250cc (Caja x12)':  54000,
+    'Oliver Cooks AOVE Intenso - Vidrio 250cc':              4700,
+    'Oliver Cooks AOVE Intenso - Vidrio 250cc (Caja x12)':  54000,
+    'Oliver Cooks AOVE Clásico - Vidrio 500cc':              7500,
+    'Oliver Cooks AOVE Clásico - Vidrio 500cc (Caja x6)':   43000,
+    'Oliver Cooks AOVE Intenso - Vidrio 500cc':              7500,
+    'Oliver Cooks AOVE Intenso - Vidrio 500cc (Caja x6)':   43000,
+    'Oliver Cooks AOVE Clásico - Pet 1000cc':               14000,
+    'Oliver Cooks AOVE Clásico - Pet 1000cc (Caja x6)':     80000,
+    'Oliver Cooks AOVE Intenso - Pet 1000cc':               14000,
+    'Oliver Cooks AOVE Intenso - Pet 1000cc (Caja x6)':     80000,
+    'Oliver Cooks AOVE Clásico - Pet 3000cc':               38800,
+    'Oliver Cooks AOVE Clásico - Pet 3000cc (Caja x4)':    148000,
+    'Oliver Cooks AOVE Intenso - Pet 3000cc':               38800,
+    'Oliver Cooks AOVE Intenso - Pet 3000cc (Caja x4)':    148000,
+    'Oliver Cooks AOVE Clásico - Pet 5000cc':               63500,
+    'Oliver Cooks AOVE Clásico - Pet 5000cc (Caja x2)':    120000,
+    'Oliver Cooks AOVE Intenso - Pet 5000cc':               63500,
+    'Oliver Cooks AOVE Intenso - Pet 5000cc (Caja x2)':    120000,
+  },
+  bono: {
+    'Oliver Cooks AOVE Clásico - Vidrio 250cc':              5100,
+    'Oliver Cooks AOVE Clásico - Vidrio 250cc (Caja x12)':  58100,
+    'Oliver Cooks AOVE Intenso - Vidrio 250cc':              5100,
+    'Oliver Cooks AOVE Intenso - Vidrio 250cc (Caja x12)':  58100,
+    'Oliver Cooks AOVE Clásico - Vidrio 500cc':              8100,
+    'Oliver Cooks AOVE Clásico - Vidrio 500cc (Caja x6)':   46200,
+    'Oliver Cooks AOVE Intenso - Vidrio 500cc':              8100,
+    'Oliver Cooks AOVE Intenso - Vidrio 500cc (Caja x6)':   46200,
+    'Oliver Cooks AOVE Clásico - Pet 1000cc':               15000,
+    'Oliver Cooks AOVE Clásico - Pet 1000cc (Caja x6)':     85500,
+    'Oliver Cooks AOVE Intenso - Pet 1000cc':               15000,
+    'Oliver Cooks AOVE Intenso - Pet 1000cc (Caja x6)':     85500,
+    'Oliver Cooks AOVE Clásico - Pet 3000cc':               41800,
+    'Oliver Cooks AOVE Clásico - Pet 3000cc (Caja x4)':    158000,
+    'Oliver Cooks AOVE Intenso - Pet 3000cc':               41800,
+    'Oliver Cooks AOVE Intenso - Pet 3000cc (Caja x4)':    158000,
+    'Oliver Cooks AOVE Clásico - Pet 5000cc':               68300,
+    'Oliver Cooks AOVE Clásico - Pet 5000cc (Caja x2)':    129700,
+    'Oliver Cooks AOVE Intenso - Pet 5000cc':               68300,
+    'Oliver Cooks AOVE Intenso - Pet 5000cc (Caja x2)':    129700,
+  },
+};
+
+const METODOS_PAGO = [
+  { value: 'empleado', label: 'Empleado', desc: 'Abona en el momento (efectivo o transferencia)' },
+  { value: 'bono',     label: 'Por Bono', desc: 'Se descuenta del sueldo el próximo mes' },
 ];
 
 const formatPrecio = (n) =>
   n === 0 ? 'A consultar' : `$\u00A0${n.toLocaleString('es-AR')}`;
 
 const EMPRESAS = [
-  { value: 'FP', label: 'FP' },
+  { value: 'FP',     label: 'FP' },
   { value: 'MULTIM', label: 'MULTIMODAL' },
 ];
 
 function App() {
   const [usuario, setUsuario] = useState(null);
   const [empresa, setEmpresa] = useState('FP');
+  const [metodoPago, setMetodoPago] = useState('empleado');
 
-  // Carrito: array de { tipo, cantidad }
   const [carrito, setCarrito] = useState([]);
-
-  // Modal de cantidad (al clickear un producto)
-  const [modalCantidad, setModalCantidad] = useState(null); // { tipo } o null
+  const [modalCantidad, setModalCantidad] = useState(null);
   const [cantidadInput, setCantidadInput] = useState(1);
   const cantidadRef = useRef(null);
 
@@ -54,13 +109,20 @@ function App() {
   const [siguienteNroFor, setSiguienteNroFor] = useState(null);
   const [modoAdmin, setModoAdmin] = useState(false);
 
+  // Precios activos según método seleccionado
+  const preciosActivos = PRECIOS_POR_METODO[metodoPago];
+  const tiposAceite = TIPOS_ACEITE_BASE.map(({ tipo }) => ({
+    tipo,
+    precio: preciosActivos[tipo] ?? 0,
+  }));
+
   // Restaurar sesión
   useEffect(() => {
     const legajoGuardado = localStorage.getItem('aceite_legajo');
     const nombreGuardado = localStorage.getItem('aceite_nombre');
     const empresaGuardada = localStorage.getItem('aceite_empresa');
     if (legajoGuardado && nombreGuardado) {
-      setUsuario({ legajo: legajoGuardado, nombre: nombreGuardado, empresa: empresaGuardada || 'DIBIAG' });
+      setUsuario({ legajo: legajoGuardado, nombre: nombreGuardado, empresa: empresaGuardada || 'FP' });
       setEmpresa(empresaGuardada || 'FP');
     }
   }, []);
@@ -69,7 +131,6 @@ function App() {
     if (usuario) cargarSiguienteNroFor();
   }, [empresa, usuario]);
 
-  // Foco automático en el input de cantidad cuando se abre el modal
   useEffect(() => {
     if (modalCantidad && cantidadRef.current) {
       setTimeout(() => cantidadRef.current?.focus(), 80);
@@ -96,16 +157,24 @@ function App() {
     setCarrito([]);
     setModal(null);
     setSiguienteNroFor(null);
+    setMetodoPago('empleado');
   };
 
-  // Abre el modal de cantidad para un producto
+  // Cambiar método de pago limpia el carrito
+  const handleCambioMetodo = (nuevoMetodo) => {
+    if (carrito.length > 0) {
+      if (!window.confirm('Cambiar el método de pago vaciará el carrito. ¿Continuar?')) return;
+    }
+    setMetodoPago(nuevoMetodo);
+    setCarrito([]);
+  };
+
   const abrirModalCantidad = (tipo) => {
     const enCarrito = carrito.find((p) => p.tipo === tipo);
     setCantidadInput(enCarrito ? enCarrito.cantidad : 1);
     setModalCantidad({ tipo });
   };
 
-  // Confirma la cantidad y agrega/actualiza el carrito
   const confirmarCantidad = () => {
     const cant = parseInt(cantidadInput, 10);
     if (!cant || cant < 1) return;
@@ -139,6 +208,7 @@ function App() {
         nroleg: usuario.legajo,
         fechaMov: fechaHoy,
         fechaIni: fechaHoy,
+        metodoPago,
         productos: carrito,
       });
 
@@ -153,10 +223,12 @@ function App() {
             legajo: usuario.legajo,
             nombre: usuario.nombre,
             empresa,
+            metodoPago,
             productos: response.data.productos,
           },
         });
         setCarrito([]);
+        setMetodoPago('empleado');
         await cargarSiguienteNroFor();
       }
     } catch (error) {
@@ -177,8 +249,8 @@ function App() {
   const esAdmin = ADMIN_LEGAJOS.includes(parseInt(usuario.legajo, 10));
   const totalProductos = carrito.reduce((acc, p) => acc + p.cantidad, 0);
   const totalImporte = carrito.reduce((acc, p) => {
-    const prod = TIPOS_ACEITE.find((t) => t.tipo === p.tipo);
-    return acc + (prod ? prod.precio * p.cantidad : 0);
+    const precio = preciosActivos[p.tipo] ?? 0;
+    return acc + precio * p.cantidad;
   }, 0);
 
   return (
@@ -229,6 +301,9 @@ function App() {
                 <button className="btn-modal-x" onClick={() => setModalCantidad(null)}>✕</button>
               </div>
               <p className="modal-cantidad-producto">{modalCantidad.tipo}</p>
+              <p className="modal-cantidad-precio">
+                {formatPrecio(preciosActivos[modalCantidad.tipo] ?? 0)} c/u
+              </p>
               <div className="cantidad-control">
                 <button
                   type="button"
@@ -286,6 +361,12 @@ function App() {
                     <span>Empresa</span>
                     <strong>{modal.detail.empresa}</strong>
                   </div>
+                  <div className="modal-detail-row">
+                    <span>Método de pago</span>
+                    <strong>
+                      {modal.detail.metodoPago === 'bono' ? 'Por Bono' : 'Empleado (efectivo/transferencia)'}
+                    </strong>
+                  </div>
 
                   {modal.detail.productos && modal.detail.productos.map((p, i) => (
                     <div key={i} className="modal-detail-row modal-producto-row">
@@ -312,133 +393,148 @@ function App() {
 
         {/* FORMULARIO CLIENTE */}
         {(!esAdmin || !modoAdmin) && (
-        <div className="form-body">
+          <div className="form-body">
+            <form onSubmit={handleSubmit}>
 
-
-          <form onSubmit={handleSubmit}>
-
-            {/* EMPRESA */}
-            <div className="form-section">
-              <div className="section-title"><span>🏢</span> Empresa y legajo</div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="empresa">Empresa</label>
-                  <select id="empresa" value={empresa} onChange={(e) => setEmpresa(e.target.value)}>
-                    {EMPRESAS.map((emp) => (
-                      <option key={emp.value} value={emp.value}>{emp.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Legajo</label>
-                  <div className="legajo-display">
-                    <span className="lock-icon">🔒</span>
-                    {usuario.legajo} — {usuario.nombre}
+              {/* EMPRESA */}
+              <div className="form-section">
+                <div className="section-title"><span>🏢</span> Empresa y legajo</div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="empresa">Empresa</label>
+                    <select id="empresa" value={empresa} onChange={(e) => setEmpresa(e.target.value)}>
+                      {EMPRESAS.map((emp) => (
+                        <option key={emp.value} value={emp.value}>{emp.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Legajo</label>
+                    <div className="legajo-display">
+                      <span className="lock-icon">🔒</span>
+                      {usuario.legajo} — {usuario.nombre}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* PRODUCTOS */}
-            <div className="form-section">
-              <div className="section-title">
-                <span>🫒</span> Productos
-                {carrito.length > 0 && (
-                  <span className="carrito-badge">{totalProductos} unid. seleccionadas</span>
-                )}
-              </div>
-
-              <div className="productos-grid">
-                {TIPOS_ACEITE.map(({ tipo, precio }) => {
-                  const enCarrito = carrito.find((p) => p.tipo === tipo);
-                  return (
+              {/* MÉTODO DE PAGO */}
+              <div className="form-section">
+                <div className="section-title"><span>💳</span> Método de pago</div>
+                <div className="metodo-pago-grid">
+                  {METODOS_PAGO.map(({ value, label, desc }) => (
                     <button
-                      key={tipo}
+                      key={value}
                       type="button"
-                      className={`producto-card ${enCarrito ? 'en-carrito' : ''}`}
-                      onClick={() => abrirModalCantidad(tipo)}
+                      className={`metodo-card ${metodoPago === value ? 'activo' : ''}`}
+                      onClick={() => handleCambioMetodo(value)}
                     >
-                      <span className="producto-icon">🫒</span>
-                      <span className="producto-nombre">
-                        {tipo}
-                        <span className="producto-precio">{formatPrecio(precio)}</span>
-                      </span>
-                      {enCarrito ? (
-                        <span className="producto-qty-badge">×{enCarrito.cantidad}</span>
-                      ) : (
-                        <span className="producto-agregar">+</span>
-                      )}
+                      <span className="metodo-label">{label}</span>
+                      <span className="metodo-desc">{desc}</span>
                     </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* CARRITO */}
-            {carrito.length > 0 && (
-              <div className="carrito-section">
-                <div className="section-title">
-                  <span>🛒</span> Mi pedido ({carrito.length} producto{carrito.length > 1 ? 's' : ''})
+                  ))}
                 </div>
-                <div className="carrito-lista">
-                  {carrito.map((item) => {
-                    const prod = TIPOS_ACEITE.find((t) => t.tipo === item.tipo);
-                    const subtotal = prod ? prod.precio * item.cantidad : 0;
+              </div>
+
+              {/* PRODUCTOS */}
+              <div className="form-section">
+                <div className="section-title">
+                  <span>🫒</span> Productos
+                  {carrito.length > 0 && (
+                    <span className="carrito-badge">{totalProductos} unid. seleccionadas</span>
+                  )}
+                </div>
+
+                <div className="productos-grid">
+                  {tiposAceite.map(({ tipo, precio }) => {
+                    const enCarrito = carrito.find((p) => p.tipo === tipo);
                     return (
-                      <div key={item.tipo} className="carrito-item">
-                        <div className="carrito-item-info">
-                          <span className="carrito-item-nombre">🫒 {item.tipo}</span>
-                          <span className="carrito-item-subtotal">
-                            {formatPrecio(prod?.precio ?? 0)} × {item.cantidad} = <strong>{formatPrecio(subtotal)}</strong>
-                          </span>
-                        </div>
-                        <div className="carrito-item-actions">
-                          <button
-                            type="button"
-                            className="btn-edit-qty"
-                            onClick={() => abrirModalCantidad(item.tipo)}
-                            title="Editar cantidad"
-                          >
-                            ×{item.cantidad}
-                          </button>
-                          <button
-                            type="button"
-                            className="btn-quitar"
-                            onClick={() => quitarDelCarrito(item.tipo)}
-                            title="Quitar"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      </div>
+                      <button
+                        key={tipo}
+                        type="button"
+                        className={`producto-card ${enCarrito ? 'en-carrito' : ''}`}
+                        onClick={() => abrirModalCantidad(tipo)}
+                      >
+                        <span className="producto-icon">🫒</span>
+                        <span className="producto-nombre">
+                          {tipo}
+                          <span className="producto-precio">{formatPrecio(precio)}</span>
+                        </span>
+                        {enCarrito ? (
+                          <span className="producto-qty-badge">×{enCarrito.cantidad}</span>
+                        ) : (
+                          <span className="producto-agregar">+</span>
+                        )}
+                      </button>
                     );
                   })}
                 </div>
-                <div className="carrito-total">
-                  <span>Total del pedido</span>
-                  <strong>{formatPrecio(totalImporte)}</strong>
-                </div>
               </div>
-            )}
 
+              {/* CARRITO */}
+              {carrito.length > 0 && (
+                <div className="carrito-section">
+                  <div className="section-title">
+                    <span>🛒</span> Mi pedido ({carrito.length} producto{carrito.length > 1 ? 's' : ''})
+                  </div>
+                  <div className="carrito-lista">
+                    {carrito.map((item) => {
+                      const precio = preciosActivos[item.tipo] ?? 0;
+                      const subtotal = precio * item.cantidad;
+                      return (
+                        <div key={item.tipo} className="carrito-item">
+                          <div className="carrito-item-info">
+                            <span className="carrito-item-nombre">🫒 {item.tipo}</span>
+                            <span className="carrito-item-subtotal">
+                              {formatPrecio(precio)} × {item.cantidad} = <strong>{formatPrecio(subtotal)}</strong>
+                            </span>
+                          </div>
+                          <div className="carrito-item-actions">
+                            <button
+                              type="button"
+                              className="btn-edit-qty"
+                              onClick={() => abrirModalCantidad(item.tipo)}
+                              title="Editar cantidad"
+                            >
+                              ×{item.cantidad}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-quitar"
+                              onClick={() => quitarDelCarrito(item.tipo)}
+                              title="Quitar"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="carrito-total">
+                    <span>Total del pedido</span>
+                    <strong>{formatPrecio(totalImporte)}</strong>
+                  </div>
+                </div>
+              )}
 
-            {/* SUBMIT */}
-            <div className="submit-section">
-              <button
-                type="submit"
-                className="btn-submit"
-                disabled={loading || carrito.length === 0}
-              >
-                {loading ? (
-                  <>Registrando pedido<span className="loading-dots"><span /><span /><span /></span></>
-                ) : (
-                  `🫒 Confirmar pedido${carrito.length > 0 ? ` (${carrito.length} producto${carrito.length > 1 ? 's' : ''})` : ''}`
-                )}
-              </button>
-            </div>
+              {/* SUBMIT */}
+              <div className="submit-section">
+                <button
+                  type="submit"
+                  className="btn-submit"
+                  disabled={loading || carrito.length === 0}
+                >
+                  {loading ? (
+                    <>Registrando pedido<span className="loading-dots"><span /><span /><span /></span></>
+                  ) : (
+                    `🫒 Confirmar pedido${carrito.length > 0 ? ` (${carrito.length} producto${carrito.length > 1 ? 's' : ''})` : ''}`
+                  )}
+                </button>
+              </div>
 
-          </form>
-        </div>
+            </form>
+          </div>
         )}
 
       </div>

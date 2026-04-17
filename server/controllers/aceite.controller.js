@@ -1,27 +1,55 @@
 import { getConnection } from '../config/database.js';
 
-// Precios por producto (en pesos)...
-const PRECIOS = {
-  'Aceite de Oliva Blend Clasico 0,25 lts.':      4550.00,
-  'Aceite de Oliva Blend Clasico 0,5 lts.':       7210.00,
-  'Aceite de Oliva Blend Clasico 1 lts.':        13300.00,
-  'Aceite de Oliva Blend Clasico 3 lts.':        18000.00,
-  'Aceite de Oliva Blend Clasico 5 lts.':        25000.00,
-  'Aceite de Oliva Blend Intenso 0,25 lts.':      4550.00,
-  'Aceite de Oliva Blend Intenso 0,5 lts.':       7210.00,
-  'Aceite de Oliva Blend Intenso 1 lts.':        13300.00,
-  'Aceite de Oliva Blend Intenso 3 lts.':        18000.00,
-  'Aceite de Oliva Blend Intenso 5 lts.':        25000.00,
-  'Aceite de Oliva Cosecha Nocturna 0,25 lts.':   4550.00,
-  'Aceite de Oliva Cosecha Nocturna 0,50 lts.':   7210.00,
-  'Aceite de Oliva bidón 3 lts sin etiqueta':    18000.00,
-  'Aceite de Oliva bidón 5 lts sin etiqueta':    25000.00,
-  'Aceite de Oliva virgen extra Blend 0,5 lts.':  7210.00,
+// Precios por método de pago
+const PRECIOS_POR_METODO = {
+  empleado: {
+    'Oliver Cooks AOVE Clásico - Vidrio 250cc':              4700.00,
+    'Oliver Cooks AOVE Clásico - Vidrio 250cc (Caja x12)':  54000.00,
+    'Oliver Cooks AOVE Intenso - Vidrio 250cc':              4700.00,
+    'Oliver Cooks AOVE Intenso - Vidrio 250cc (Caja x12)':  54000.00,
+    'Oliver Cooks AOVE Clásico - Vidrio 500cc':              7500.00,
+    'Oliver Cooks AOVE Clásico - Vidrio 500cc (Caja x6)':   43000.00,
+    'Oliver Cooks AOVE Intenso - Vidrio 500cc':              7500.00,
+    'Oliver Cooks AOVE Intenso - Vidrio 500cc (Caja x6)':   43000.00,
+    'Oliver Cooks AOVE Clásico - Pet 1000cc':               14000.00,
+    'Oliver Cooks AOVE Clásico - Pet 1000cc (Caja x6)':     80000.00,
+    'Oliver Cooks AOVE Intenso - Pet 1000cc':               14000.00,
+    'Oliver Cooks AOVE Intenso - Pet 1000cc (Caja x6)':     80000.00,
+    'Oliver Cooks AOVE Clásico - Pet 3000cc':               38800.00,
+    'Oliver Cooks AOVE Clásico - Pet 3000cc (Caja x4)':    148000.00,
+    'Oliver Cooks AOVE Intenso - Pet 3000cc':               38800.00,
+    'Oliver Cooks AOVE Intenso - Pet 3000cc (Caja x4)':    148000.00,
+    'Oliver Cooks AOVE Clásico - Pet 5000cc':               63500.00,
+    'Oliver Cooks AOVE Clásico - Pet 5000cc (Caja x2)':    120000.00,
+    'Oliver Cooks AOVE Intenso - Pet 5000cc':               63500.00,
+    'Oliver Cooks AOVE Intenso - Pet 5000cc (Caja x2)':    120000.00,
+  },
+  bono: {
+    'Oliver Cooks AOVE Clásico - Vidrio 250cc':              5100.00,
+    'Oliver Cooks AOVE Clásico - Vidrio 250cc (Caja x12)':  58100.00,
+    'Oliver Cooks AOVE Intenso - Vidrio 250cc':              5100.00,
+    'Oliver Cooks AOVE Intenso - Vidrio 250cc (Caja x12)':  58100.00,
+    'Oliver Cooks AOVE Clásico - Vidrio 500cc':              8100.00,
+    'Oliver Cooks AOVE Clásico - Vidrio 500cc (Caja x6)':   46200.00,
+    'Oliver Cooks AOVE Intenso - Vidrio 500cc':              8100.00,
+    'Oliver Cooks AOVE Intenso - Vidrio 500cc (Caja x6)':   46200.00,
+    'Oliver Cooks AOVE Clásico - Pet 1000cc':               15000.00,
+    'Oliver Cooks AOVE Clásico - Pet 1000cc (Caja x6)':     85500.00,
+    'Oliver Cooks AOVE Intenso - Pet 1000cc':               15000.00,
+    'Oliver Cooks AOVE Intenso - Pet 1000cc (Caja x6)':     85500.00,
+    'Oliver Cooks AOVE Clásico - Pet 3000cc':               41800.00,
+    'Oliver Cooks AOVE Clásico - Pet 3000cc (Caja x4)':    158000.00,
+    'Oliver Cooks AOVE Intenso - Pet 3000cc':               41800.00,
+    'Oliver Cooks AOVE Intenso - Pet 3000cc (Caja x4)':    158000.00,
+    'Oliver Cooks AOVE Clásico - Pet 5000cc':               68300.00,
+    'Oliver Cooks AOVE Clásico - Pet 5000cc (Caja x2)':    129700.00,
+    'Oliver Cooks AOVE Intenso - Pet 5000cc':               68300.00,
+    'Oliver Cooks AOVE Intenso - Pet 5000cc (Caja x2)':    129700.00,
+  },
 };
 
 /**
  * Valida que el legajo exista en SJMLGH para la empresa dada
- * Devuelve el nombre del empleado si existe
  */
 export async function validarLegajo(req, res) {
   try {
@@ -99,12 +127,10 @@ export async function getUltimoNroFor(req, res) {
       ultimoNroFor = parseInt(result.recordset[0].SJTPAH_NROFOR) || 0;
     }
 
-    const siguienteNroFor = ultimoNroFor + 1;
-
     res.json({
       success: true,
       ultimoNroFor,
-      siguienteNroFor,
+      siguienteNroFor: ultimoNroFor + 1,
     });
   } catch (error) {
     console.error('Error al obtener último NROFOR:', error);
@@ -118,11 +144,7 @@ export async function getUltimoNroFor(req, res) {
 
 /**
  * Inserta el pedido de aceite para un empleado.
- * Acepta un array de productos: [{ tipo, cantidad }]
- * Lógica:
- *   - 1 registro SJTPAH para todo el pedido
- *   - 1 registro SJTPAI por cada producto, con SJTPAI_CUOTAS = 1, 2, 3...
- *   - SJTPAI_MOTIVO = nombre del producto + cantidad
+ * Acepta: { empresa, nroleg, fechaMov, fechaIni, metodoPago, productos: [{ tipo, cantidad }] }
  */
 export async function insertarPedidoAceite(req, res) {
   try {
@@ -131,17 +153,14 @@ export async function insertarPedidoAceite(req, res) {
       nroleg,
       fechaMov,
       fechaIni,
-      productos, // [{ tipo, cantidad }]
+      metodoPago = 'empleado',
+      productos,
     } = req.body;
 
     console.log('=== INICIANDO INSERCIÓN PEDIDO ACEITE ===');
-    console.log('CODEMP:', empresa);
-    console.log('Legajo:', nroleg);
-    console.log('Fecha Mov:', fechaMov);
-    console.log('Fecha Ini:', fechaIni);
+    console.log('CODEMP:', empresa, '| Legajo:', nroleg, '| Método:', metodoPago);
     console.log('Productos:', productos);
 
-    // Validaciones
     if (!nroleg || !String(nroleg).trim()) {
       return res.status(400).json({ success: false, message: 'Legajo es obligatorio' });
     }
@@ -152,9 +171,12 @@ export async function insertarPedidoAceite(req, res) {
       return res.status(400).json({ success: false, message: 'Debe seleccionar al menos un producto' });
     }
 
+    const PRECIOS = PRECIOS_POR_METODO[metodoPago] || PRECIOS_POR_METODO.empleado;
+    const metodoLabel = metodoPago === 'bono' ? 'Descuento por Bono' : 'Empleado (efectivo/transferencia)';
+
     const pool = await getConnection();
 
-    // Obtener el siguiente NROFOR disponible
+    // Siguiente NROFOR
     const resultNroFor = await pool.request().query(`
       SELECT TOP 1 CAST(SJTPAH_NROFOR AS INT) as SJTPAH_NROFOR
       FROM SJTPAH
@@ -168,23 +190,21 @@ export async function insertarPedidoAceite(req, res) {
       nroFor = parseInt(resultNroFor.recordset[0].SJTPAH_NROFOR) + 1;
     }
 
-    console.log(`NROFOR asignado: ${nroFor} para CODEMP ${empresa}`);
+    console.log(`NROFOR asignado: ${nroFor}`);
 
     const legajoLimpio = String(nroleg).trim();
     const legajoPadded = legajoLimpio.padStart(6, ' ');
 
-    // Calcular precio total del pedido (suma de precio_unitario × cantidad por producto)
+    // Importe total
     const importeTotal = productos.reduce((acc, { tipo, cantidad = 1 }) => {
       const precioUnit = PRECIOS[String(tipo).trim()] ?? 0;
       return acc + precioUnit * parseInt(cantidad, 10);
     }, 0);
 
-    console.log(`Importe total calculado: $${importeTotal.toFixed(2)}`);
+    console.log(`Importe total: $${importeTotal.toFixed(2)}`);
 
-    // ── 1. INSERT SJTPAH (cabecera única del pedido) ──
-    // SJTPAH_CUOTAS = 1 siempre
-    // SJTPAH_IMPORT = precio total de todos los productos
-    const resumenTexto = `Pedido de aceite - ${productos.length} producto(s)`;
+    // ── INSERT SJTPAH ──
+    const resumenTexto = `${metodoLabel} - ${productos.length} producto(s)`;
 
     await pool.request().query(`
       INSERT INTO SJTPAH (
@@ -205,9 +225,9 @@ export async function insertarPedidoAceite(req, res) {
         '${resumenTexto.replace(/'/g, "''")}'
       )
     `);
-    console.log(`✓ SJTPAH insertado (NROFOR: ${nroFor}, IMPORT: $${importeTotal.toFixed(2)})`);
+    console.log(`✓ SJTPAH insertado (NROFOR: ${nroFor})`);
 
-    // ── 2. INSERT SJTPAI: un registro por producto ──
+    // ── INSERT SJTPAI: uno por producto ──
     const itemsInsertados = [];
     const errores = [];
 
@@ -215,7 +235,7 @@ export async function insertarPedidoAceite(req, res) {
       const { tipo, cantidad = 1 } = productos[i];
       if (!tipo || !String(tipo).trim()) continue;
 
-      const nroCuota = i + 1; // 1, 2, 3...
+      const nroCuota = i + 1;
       const precioUnit = PRECIOS[String(tipo).trim()] ?? 0;
       const totalLinea = precioUnit * parseInt(cantidad, 10);
       const precioFmt = precioUnit.toLocaleString('es-AR', { minimumFractionDigits: 2 });
@@ -239,7 +259,7 @@ export async function insertarPedidoAceite(req, res) {
             '${motivoTexto.replace(/'/g, "''")}'
           )
         `);
-        console.log(`  ✓ SJTPAI cuota ${nroCuota}: ${tipo} | unit $${precioUnit.toFixed(2)} x${cantidad} = $${totalLinea.toFixed(2)}`);
+        console.log(`  ✓ cuota ${nroCuota}: ${tipo} x${cantidad} = $${totalLinea.toFixed(2)}`);
         itemsInsertados.push({ tipo, cantidad, cuota: nroCuota, precioUnit, totalLinea });
       } catch (paiErr) {
         console.error(`  ✗ Error SJTPAI cuota ${nroCuota}:`, paiErr.message);
@@ -247,18 +267,19 @@ export async function insertarPedidoAceite(req, res) {
       }
     }
 
-    console.log(`\n=== RESUMEN: NROFOR ${nroFor} | ${itemsInsertados.length} items OK, ${errores.length} errores ===`);
+    console.log(`=== NROFOR ${nroFor} | ${itemsInsertados.length} OK, ${errores.length} errores ===`);
 
     res.json({
       success: true,
-      message: `Pedido registrado correctamente`,
+      message: 'Pedido registrado correctamente',
       nrofor: nroFor,
       insertados: itemsInsertados.length,
+      metodoPago,
       productos: itemsInsertados,
       errores: errores.length > 0 ? errores : undefined,
     });
   } catch (error) {
-    console.error('✗✗✗ ERROR AL INSERTAR PEDIDO ACEITE:', error);
+    console.error('✗✗✗ ERROR AL INSERTAR:', error);
     res.status(500).json({
       success: false,
       message: 'Error al registrar el pedido',

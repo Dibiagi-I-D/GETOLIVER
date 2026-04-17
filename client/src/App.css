@@ -832,3 +832,66 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── MÉTODO DE PAGO ── */
+.metodo-pago-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.metodo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.metodo-card:hover {
+  border-color: #6b8e23;
+  background: #f8faf4;
+}
+
+.metodo-card.activo {
+  border-color: #4a7c23;
+  background: #f0f7e8;
+  box-shadow: 0 0 0 3px rgba(74, 124, 35, 0.15);
+}
+
+.metodo-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #2d5016;
+}
+
+.metodo-desc {
+  font-size: 0.78rem;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
+.metodo-card.activo .metodo-desc {
+  color: #4a7c23;
+}
+
+.modal-cantidad-precio {
+  font-size: 0.88rem;
+  color: #4a7c23;
+  font-weight: 600;
+  margin: -8px 0 8px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .metodo-pago-grid {
+    grid-template-columns: 1fr;
+  }
+}
