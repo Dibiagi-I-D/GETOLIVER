@@ -173,21 +173,19 @@ const generarPDF = (pedido) => {
 
   // ── CAJA 5: Información adicional ────────────────────────────────────────
   y += 18;
-  borde(ML, y, INNER, 20);
-  label('Información adicional:', ML + 3, y + 7);
-  label('Cantidad de cuotas a devolver:', ML + 3, y + 13);
-  valor(String(pedido.items.length), ML + 72, y + 13);
-  label('Fecha de inicio', W - MR - 65, y + 7);
-  valor(pedido.fecha, W - MR - 32, y + 7);
+  borde(ML, y, INNER, 16);
+  label('Información adicional:', ML + 3, y + 6);
+  label('Fecha de inicio:', W - MR - 65, y + 6);
+  valor(pedido.fecha, W - MR - 30, y + 6);
 
   const metodoPago = extraerMetodoPago(pedido.observaciones);
-  label('Forma de pago:', ML + 3, y + 19);
-  txt(metodoPago, ML + 35, y + 19, { size: 8.5 });
-  label('Tipo de corte', W - MR - 65, y + 19);
-  valor('Mensual', W - MR - 32, y + 19);
+  label('Forma de pago:', ML + 3, y + 13);
+  txt(metodoPago || '-', ML + 35, y + 13, { size: 8.5 });
+  label('Tipo de corte:', W - MR - 65, y + 13);
+  valor('Mensual', W - MR - 30, y + 13);
 
   // ── Tabla de productos ───────────────────────────────────────────────────
-  y += 24;
+  y += 20;
 
   autoTable(doc, {
     startY: y,
