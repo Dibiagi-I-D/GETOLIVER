@@ -281,4 +281,12 @@
   .header-title h1 { font-size: 19px; }
   .form-row { grid-template-columns: 1fr; }
   .metodo-pago-grid { grid-template-columns: 1fr; }
+  .app {
+    background-attachment: scroll;
+    background-color: #060f03;
+  }
+  .app::before {
+    position: fixed;
+    background: rgba(5,18,2,0.68);
+  }
 }
