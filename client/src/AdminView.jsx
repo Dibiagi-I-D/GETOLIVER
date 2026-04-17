@@ -29,141 +29,222 @@ const sanitizarNombre = (nombre) =>
     .trim()
     .replace(/\s+/g, '_');
 
+// Mapa de código de empresa a nombre completo
+const NOMBRE_EMPRESA = {
+  FP:     'FLOTA DEL PACÍFICO',
+  MULTIM: 'MULTIMODAL',
+};
+
+// Convierte un número a palabras en español (para el monto del recibo)
+const numeroALetras = (num) => {
+  const unidades = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve',
+    'diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
+  const decenas  = ['', '', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+  const centenas = ['', 'cien', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos',
+    'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+
+  const parteEntera = Math.floor(num);
+  const centavos    = Math.round((num - parteEntera) * 100);
+
+  const convertirGrupo = (n) => {
+    if (n === 0) return '';
+    if (n === 100) return 'cien';
+    let res = '';
+    if (n >= 100) { res += centenas[Math.floor(n / 100)] + ' '; n %= 100; }
+    if (n >= 20)  { res += decenas[Math.floor(n / 10)]; if (n % 10) res += ' y ' + unidades[n % 10]; }
+    else if (n > 0) res += unidades[n];
+    return res.trim();
+  };
+
+  const convertir = (n) => {
+    if (n === 0) return 'cero';
+    let res = '';
+    if (n >= 1000000) {
+      const m = Math.floor(n / 1000000);
+      res += (m === 1 ? 'un millón' : convertirGrupo(m) + ' millones') + ' ';
+      n %= 1000000;
+    }
+    if (n >= 1000) {
+      const m = Math.floor(n / 1000);
+      res += (m === 1 ? 'mil' : convertirGrupo(m) + ' mil') + ' ';
+      n %= 1000;
+    }
+    if (n > 0) res += convertirGrupo(n);
+    return res.trim();
+  };
+
+  const letras = convertir(parteEntera);
+  const letrasCapital = letras.charAt(0).toUpperCase() + letras.slice(1);
+  return `${letrasCapital} con ${String(centavos).padStart(2, '0')}/100`;
+};
+
+// Extrae el método de pago legible desde el campo observaciones
+const extraerMetodoPago = (observaciones) => {
+  if (!observaciones) return '';
+  if (observaciones.toLowerCase().includes('bono')) return 'Descuento por Bono';
+  if (observaciones.toLowerCase().includes('empleado')) return 'Empleado (efectivo/transferencia)';
+  return observaciones;
+};
+
 const generarPDF = (pedido) => {
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const ancho = 210;
+  const doc  = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W    = 210;
+  const ML   = 15;   // margen izquierdo
+  const MR   = 15;   // margen derecho
+  const INNER = W - ML - MR;  // ancho útil
 
-  // ── Fondo del header ──────────────────────────────────────────────────────
-  doc.setFillColor(10, 35, 5);
-  doc.rect(0, 0, ancho, 48, 'F');
+  const negro  = [0, 0, 0];
+  const gris   = [100, 100, 100];
+  const blanco = [255, 255, 255];
 
-  // Línea dorada decorativa
-  doc.setDrawColor(201, 168, 76);
-  doc.setLineWidth(0.6);
-  doc.line(0, 48, ancho, 48);
+  // Helpers
+  const borde = (x, y, w, h) => {
+    doc.setDrawColor(...negro);
+    doc.setLineWidth(0.3);
+    doc.rect(x, y, w, h, 'S');
+  };
+  const txt = (text, x, y, opts = {}) => {
+    doc.setTextColor(...(opts.color || negro));
+    doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
+    doc.setFontSize(opts.size || 9);
+    doc.text(String(text), x, y, opts);
+  };
+  const label = (t, x, y) => txt(t, x, y, { size: 9, color: gris });
+  const valor = (t, x, y, size = 9) => txt(t, x, y, { bold: true, size });
 
-  // Título empresa
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(20);
-  doc.setTextColor(201, 168, 76);
-  doc.text('DIBIAGI — Aceite Oliver', ancho / 2, 20, { align: 'center' });
+  // ── Encabezado de la empresa ───────────────────────────────────────────────
+  txt('DIBIAGI S.A.',     W / 2, 16, { bold: true, size: 14, align: 'center' });
+  txt('Aceite de Oliva Oliver Cooks', W / 2, 22, { size: 9, color: gris, align: 'center' });
 
-  // Subtítulo
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
-  doc.setTextColor(200, 200, 200);
-  doc.text('COMPROBANTE DE PEDIDO', ancho / 2, 30, { align: 'center' });
+  doc.setDrawColor(...negro);
+  doc.setLineWidth(0.5);
+  doc.line(ML, 25, W - MR, 25);
 
-  // Número de pedido
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(201, 168, 76);
-  doc.text(`N° ${pedido.nrofor}`, ancho / 2, 40, { align: 'center' });
+  // ── CAJA 1: Recibo Número / Fecha ──────────────────────────────────────────
+  let y = 28;
+  borde(ML, y, INNER, 12);
+  label('Recibo Número:', ML + 3, y + 8);
+  valor(String(pedido.nrofor), ML + 35, y + 8, 11);
+  label('Fecha', W - MR - 45, y + 8);
+  valor(pedido.fecha, W - MR - 28, y + 8, 11);
 
-  // ── Sección: Datos del empleado ───────────────────────────────────────────
-  let y = 60;
+  // ── CAJA 2: Páguese a / Empresa / Legajo ──────────────────────────────────
+  y += 12;
+  borde(ML, y, INNER, 16);
+  label('Páguese a:', ML + 3, y + 6);
+  valor(pedido.nombre, ML + 25, y + 6);
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.setTextColor(120, 140, 120);
-  doc.text('DATOS DEL EMPLEADO', 15, y);
-  y += 5;
+  const empresaNombre = NOMBRE_EMPRESA[pedido.empresa] || pedido.empresa;
+  label('Empresa:', ML + 3, y + 12);
+  valor(empresaNombre, ML + 22, y + 12);
+  label('Legajo', W - MR - 35, y + 12);
+  valor(String(pedido.nroleg).padStart(4, '0'), W - MR - 16, y + 12);
 
-  doc.setDrawColor(201, 168, 76);
-  doc.setLineWidth(0.3);
-  doc.line(15, y, ancho - 15, y);
-  y += 6;
+  // ── CAJA 3: La suma de ────────────────────────────────────────────────────
+  y += 16;
+  borde(ML, y, INNER, 14);
+  label('La suma de:', ML + 3, y + 6);
+  valor(
+    Number(pedido.importeTotal).toLocaleString('es-AR', { minimumFractionDigits: 2 }),
+    ML + 26, y + 6, 10
+  );
+  // Monto en letras
+  const enLetras = numeroALetras(pedido.importeTotal);
+  txt(enLetras, ML + 58, y + 6, { size: 9, color: gris });
+  // Entregado (siempre en el PDF)
+  doc.setFillColor(230, 230, 230);
+  doc.rect(W - MR - 32, y + 2, 30, 10, 'F');
+  borde(W - MR - 32, y + 2, 30, 10);
+  txt('ENTREGADO', W - MR - 17, y + 8.5, { bold: true, size: 8, align: 'center' });
 
-  const filas = [
-    ['Empleado',  pedido.nombre],
-    ['Legajo',    String(pedido.nroleg)],
-    ['Empresa',   pedido.empresa],
-    ['Fecha',     pedido.fecha],
-    ['Estado',    pedido.status === 'E' ? 'ENTREGADO' : 'PENDIENTE DE ENTREGA'],
-  ];
+  // ── CAJA 4: En concepto de / Observaciones ────────────────────────────────
+  y += 14;
+  borde(ML, y, INNER, 18);
+  label('En concepto de:', ML + 3, y + 6);
+  valor('POLIVA. Préstamos x Aceite de Oliva', ML + 3, y + 12);
 
-  filas.forEach(([label, valor]) => {
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(110, 130, 110);
-    doc.text(label, 15, y);
+  const mitad = ML + INNER / 2;
+  doc.setDrawColor(...gris);
+  doc.setLineWidth(0.15);
+  doc.line(mitad, y, mitad, y + 18);
 
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(30, 30, 30);
-    doc.text(valor, 75, y);
-    y += 8;
-  });
+  label('Observaciones:', mitad + 3, y + 6);
+  txt(pedido.observaciones || '-', mitad + 3, y + 12, { size: 8.5, color: gris });
 
-  // ── Sección: Productos ────────────────────────────────────────────────────
-  y += 4;
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.setTextColor(120, 140, 120);
-  doc.text('DETALLE DE PRODUCTOS', 15, y);
-  y += 5;
+  // ── CAJA 5: Información adicional ────────────────────────────────────────
+  y += 18;
+  borde(ML, y, INNER, 20);
+  label('Información adicional:', ML + 3, y + 7);
+  label('Cantidad de cuotas a devolver:', ML + 3, y + 13);
+  valor(String(pedido.items.length), ML + 72, y + 13);
+  label('Fecha de inicio', W - MR - 65, y + 7);
+  valor(pedido.fecha, W - MR - 32, y + 7);
+
+  const metodoPago = extraerMetodoPago(pedido.observaciones);
+  label('Forma de pago:', ML + 3, y + 19);
+  txt(metodoPago, ML + 35, y + 19, { size: 8.5 });
+  label('Tipo de corte', W - MR - 65, y + 19);
+  valor('Mensual', W - MR - 32, y + 19);
+
+  // ── Tabla de productos ───────────────────────────────────────────────────
+  y += 24;
 
   autoTable(doc, {
     startY: y,
-    margin: { left: 15, right: 15 },
-    head: [['#', 'Producto', 'Precio']],
+    margin: { left: ML, right: MR },
+    head: [['N°', 'Producto', 'Importe']],
     body: pedido.items.map((item, i) => [
       i + 1,
       item.motivo,
-      formatPrecio(item.impcuo),
+      `$ ${Number(item.impcuo).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`,
     ]),
     headStyles: {
-      fillColor: [10, 35, 5],
-      textColor: [201, 168, 76],
+      fillColor: [220, 220, 220],
+      textColor: negro,
       fontStyle: 'bold',
-      fontSize: 9,
+      fontSize: 8.5,
+      halign: 'left',
     },
-    bodyStyles: {
-      fontSize: 9,
-      textColor: [40, 40, 40],
-    },
-    alternateRowStyles: {
-      fillColor: [245, 248, 243],
-    },
+    bodyStyles: { fontSize: 8.5, textColor: negro },
+    alternateRowStyles: { fillColor: [248, 248, 248] },
     columnStyles: {
       0: { cellWidth: 10, halign: 'center' },
       1: { cellWidth: 'auto' },
-      2: { cellWidth: 35, halign: 'right' },
+      2: { cellWidth: 38, halign: 'right' },
     },
-    styles: {
-      lineColor: [220, 230, 215],
-      lineWidth: 0.2,
-    },
+    styles: { lineColor: negro, lineWidth: 0.15 },
     theme: 'grid',
   });
 
   // ── Total ─────────────────────────────────────────────────────────────────
-  const finalY = doc.lastAutoTable.finalY + 6;
+  const afterTable = doc.lastAutoTable.finalY;
+  borde(ML, afterTable, INNER, 12);
+  label('TOTAL', ML + 3, afterTable + 8);
+  txt(
+    `$ ${Number(pedido.importeTotal).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`,
+    W - MR - 3, afterTable + 8,
+    { bold: true, size: 11, align: 'right' }
+  );
 
-  doc.setFillColor(10, 35, 5);
-  doc.roundedRect(15, finalY, ancho - 30, 14, 3, 3, 'F');
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(180, 180, 180);
-  doc.text('TOTAL DEL PEDIDO', 25, finalY + 9);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.setTextColor(201, 168, 76);
-  doc.text(formatPrecio(pedido.importeTotal), ancho - 20, finalY + 9, { align: 'right' });
+  // ── Líneas de firma ───────────────────────────────────────────────────────
+  const firmaY = afterTable + 26;
+  doc.setDrawColor(...negro);
+  doc.setLineWidth(0.3);
+  doc.line(ML, firmaY, ML + 60, firmaY);
+  doc.line(W - MR - 60, firmaY, W - MR, firmaY);
+  txt('Firma y aclaración empleado', ML + 30, firmaY + 5, { size: 7.5, color: gris, align: 'center' });
+  txt('Firma entregador', W - MR - 30, firmaY + 5, { size: 7.5, color: gris, align: 'center' });
 
   // ── Footer ────────────────────────────────────────────────────────────────
-  const footerY = 287;
-  doc.setDrawColor(201, 168, 76);
-  doc.setLineWidth(0.3);
-  doc.line(15, footerY - 4, ancho - 15, footerY - 4);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
-  doc.setTextColor(150, 150, 150);
-  const ahora = new Date().toLocaleString('es-AR');
-  doc.text(`Generado el ${ahora}`, 15, footerY);
-  doc.text('DIBIAGI — Documento interno', ancho - 15, footerY, { align: 'right' });
+  const footerY = 290;
+  doc.setDrawColor(...gris);
+  doc.setLineWidth(0.2);
+  doc.line(ML, footerY - 3, W - MR, footerY - 3);
+  txt(
+    `Generado el ${new Date().toLocaleString('es-AR')}`,
+    ML, footerY, { size: 7, color: gris }
+  );
+  txt('DIBIAGI S.A. — Documento interno', W - MR, footerY, { size: 7, color: gris, align: 'right' });
 
   return doc;
 };

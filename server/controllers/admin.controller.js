@@ -18,6 +18,7 @@ export async function getPedidos(req, res) {
         h.SJTPAH_STATUS                                   AS status,
         h.SJTPAH_IMPORT                                   AS importeTotal,
         RTRIM(LTRIM(ISNULL(m.SJMLGH_NOMBRE, 'Sin nombre'))) AS nombre,
+        RTRIM(LTRIM(ISNULL(h.USR_SJTPAH_TEXTOS, '')))    AS observaciones,
         i.SJTPAI_CUOTAS                                   AS cuota,
         RTRIM(LTRIM(ISNULL(i.SJTPAI_MOTIVO, '')))         AS motivo,
         i.SJTPAI_IMPCUO                                   AS impcuo
@@ -43,14 +44,15 @@ export async function getPedidos(req, res) {
 
       if (!pedidosMap.has(key)) {
         pedidosMap.set(key, {
-          nrofor:       row.nrofor,
-          nroleg:       row.nroleg,
-          empresa:      row.empresa,
-          fecha:        row.fecha,
-          status:       row.status,
-          importeTotal: parseFloat(row.importeTotal) || 0,
-          nombre:       row.nombre,
-          items:        [],
+          nrofor:        row.nrofor,
+          nroleg:        row.nroleg,
+          empresa:       row.empresa,
+          fecha:         row.fecha,
+          status:        row.status,
+          importeTotal:  parseFloat(row.importeTotal) || 0,
+          nombre:        row.nombre,
+          observaciones: row.observaciones || '',
+          items:         [],
         });
       }
 
