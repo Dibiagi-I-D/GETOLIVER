@@ -224,15 +224,25 @@
 .modal-cantidad-producto { font-size: 13px; color: var(--text-dim); margin-bottom: 4px; }
 .modal-cantidad-precio { font-size: 15px; font-weight: 700; color: var(--gold); margin-bottom: 18px; font-family: "Playfair Display", serif; }
 .cantidad-control {
-  display: flex; align-items: center; margin-bottom: 20px;
-  border: 1px solid var(--glass-border); border-radius: var(--radius-sm); overflow: hidden;
+  display: flex; align-items: stretch; margin-bottom: 20px;
 }
-.btn-qty { width: 48px; height: 48px; background: rgba(255,255,255,0.06); border: none; color: var(--text); font-size: 20px; cursor: pointer; flex-shrink: 0; }
-.btn-qty:hover { background: rgba(255,255,255,0.12); }
+.btn-qty {
+  width: 48px; height: 48px;
+  background: rgba(74, 124, 35, 0.55);
+  color: #ffffff;
+  font-size: 24px; font-weight: 900; line-height: 1;
+  cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  user-select: none;
+  border: 1px solid var(--glass-border);
+}
+.btn-qty:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); border-right: none; }
+.btn-qty:last-child  { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; border-left: none; }
+.btn-qty:hover { background: rgba(74, 124, 35, 0.85); }
 .qty-input {
-  flex: 1; height: 48px; text-align: center; border: none;
-  border-left: 1px solid var(--glass-border); border-right: 1px solid var(--glass-border);
-  background: rgba(255,255,255,0.04); color: var(--text); font-size: 18px; font-weight: 600;
+  flex: 1; height: 48px; text-align: center;
+  border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border); border-left: none; border-right: none;
+  background: rgba(255,255,255,0.04); color: var(--text); font-size: 18px; font-weight: 600; min-width: 0;
 }
 .qty-input:focus { outline: none; }
 .qty-input::-webkit-inner-spin-button, .qty-input::-webkit-outer-spin-button { -webkit-appearance: none; }
