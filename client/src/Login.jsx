@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Login.css';
+import fondoDesktop from '../assets/fondo de pantalla de desktop.png';
+import fondoMobile from '../assets/fondo de pantalla responsivo.jpeg';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -83,13 +85,19 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div className="login-container">
+    <div
+      className="login-container"
+      style={{
+        '--bg-desktop': `url(${fondoDesktop})`,
+        '--bg-mobile': `url(${fondoMobile})`,
+      }}
+    >
+      <div className="login-brand">
+        <div className="login-brand-title">Oliver</div>
+        <div className="login-brand-sub">Sistema de Beneficios — DIBIAGI</div>
+      </div>
+
       <div className="login-box">
-        <div className="login-header">
-          <span className="login-icon">🫒</span>
-          <h1>Pedido de Aceite</h1>
-          <p>DIBIAGI — Sistema de Beneficios</p>
-        </div>
 
         <div className="login-body">
           {datoGuardado ? (
