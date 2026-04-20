@@ -121,8 +121,15 @@
 }
 .metodo-card:hover { background: var(--glass-hover); }
 .metodo-card.activo { border-color: rgba(201,168,76,0.55); background: var(--gold-dim); box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+.metodo-label-row { display: flex; align-items: center; gap: 8px; }
 .metodo-label { font-weight: 700; font-size: 14px; color: var(--text); }
 .metodo-card.activo .metodo-label { color: var(--gold-light); }
+.metodo-badge {
+  font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px;
+  background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3);
+  letter-spacing: 0.02em; white-space: nowrap;
+}
+.metodo-card.activo .metodo-badge { background: rgba(74,222,128,0.2); border-color: rgba(74,222,128,0.5); }
 .metodo-desc { font-size: 11px; color: var(--text-faint); line-height: 1.4; }
 .metodo-card.activo .metodo-desc { color: rgba(232,201,122,0.7); }
 

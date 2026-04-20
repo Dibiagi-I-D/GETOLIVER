@@ -83,7 +83,7 @@ const PRECIOS_POR_METODO = {
 };
 
 const METODOS_PAGO = [
-  { value: 'empleado', label: 'Empleado', desc: 'Abona en el momento (efectivo o transferencia)' },
+  { value: 'empleado', label: 'Empleado', desc: 'Abona en el momento (efectivo o transferencia)', badge: 'Precio más bajo' },
   { value: 'bono',     label: 'Por Bono', desc: 'Se descuenta del sueldo el próximo mes' },
 ];
 
@@ -427,14 +427,17 @@ function App() {
                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                 <div className="section-title"><span>💳</span> Método de pago</div>
                 <div className="metodo-pago-grid">
-                  {METODOS_PAGO.map(({ value, label, desc }) => (
+                  {METODOS_PAGO.map(({ value, label, desc, badge }) => (
                     <button
                       key={value}
                       type="button"
                       className={`metodo-card ${metodoPago === value ? 'activo' : ''}`}
                       onClick={() => handleCambioMetodo(value)}
                     >
-                      <span className="metodo-label">{label}</span>
+                      <div className="metodo-label-row">
+                        <span className="metodo-label">{label}</span>
+                        {badge && <span className="metodo-badge">{badge}</span>}
+                      </div>
                       <span className="metodo-desc">{desc}</span>
                     </button>
                   ))}
