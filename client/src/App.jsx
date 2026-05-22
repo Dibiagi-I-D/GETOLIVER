@@ -5,6 +5,7 @@ import './App.css';
 import Login from './Login';
 import AdminView from './AdminView';
 import fondoDesktop from '../assets/fondo-desktop.webp';
+import aceitunaIcon from '../assets/reemplazar emoji de aceituna.jpg';
 
 const ADMIN_LEGAJOS = [13];
 
@@ -263,7 +264,7 @@ function App() {
         <header className="app-header">
           <div className="header-top">
             <div className="header-title">
-              <span className="icon">🫒</span>
+              <img src={aceitunaIcon} className="icon" alt="aceituna" />
               <div>
                 <h1>Pedido de Aceite</h1>
                 <p>DIBIAGI — Sistema de Beneficios</p>
@@ -302,7 +303,7 @@ function App() {
                 initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0 }} transition={{ duration: 0.2 }}>
                 <div className="modal-cantidad-header">
-                  <span className="modal-cantidad-icon">🫒</span>
+                  <img src={aceitunaIcon} className="modal-cantidad-icon" alt="aceituna" />
                   <h3>Cantidad</h3>
                   <button className="btn-modal-x" onClick={() => setModalCantidad(null)}>✕</button>
                 </div>
@@ -372,7 +373,7 @@ function App() {
                     </div>
                     {modal.detail.productos && modal.detail.productos.map((p, i) => (
                       <div key={i} className="modal-detail-row modal-producto-row">
-                        <span>🫒 {p.tipo}</span>
+                        <span><img src={aceitunaIcon} className="aceituna-inline" alt="" /> {p.tipo}</span>
                         <strong>×{p.cantidad}</strong>
                       </div>
                     ))}
@@ -448,7 +449,7 @@ function App() {
               <motion.div className="form-section"
                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
                 <div className="section-title">
-                  <span>🫒</span> Productos
+                  <img src={aceitunaIcon} className="aceituna-inline" alt="" /> Productos
                   {carrito.length > 0 && (
                     <span className="carrito-badge">{totalProductos} unid. seleccionadas</span>
                   )}
@@ -463,7 +464,7 @@ function App() {
                         className={`producto-card ${enCarrito ? 'en-carrito' : ''}`}
                         onClick={() => abrirModalCantidad(tipo)}
                       >
-                        <span className="producto-icon">🫒</span>
+                        <img src={aceitunaIcon} className="producto-icon" alt="" />
                         <span className="producto-nombre">
                           {tipo}
                           <span className="producto-precio">{formatPrecio(precio)}</span>
@@ -497,7 +498,7 @@ function App() {
                             initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 10 }} layout>
                             <div className="carrito-item-info">
-                              <span className="carrito-item-nombre">🫒 {item.tipo}</span>
+                              <span className="carrito-item-nombre"><img src={aceitunaIcon} className="aceituna-inline" alt="" /> {item.tipo}</span>
                               <span className="carrito-item-subtotal">
                                 {formatPrecio(precio)} × {item.cantidad} = <strong>{formatPrecio(subtotal)}</strong>
                               </span>
@@ -533,7 +534,7 @@ function App() {
                   {loading ? (
                     <>Registrando pedido<span className="loading-dots"><span /><span /><span /></span></>
                   ) : (
-                    `🫒 Confirmar pedido${carrito.length > 0 ? ` (${carrito.length} producto${carrito.length > 1 ? 's' : ''})` : ''}`
+                    <><img src={aceitunaIcon} className="aceituna-inline" alt="" /> Confirmar pedido{carrito.length > 0 ? ` (${carrito.length} producto${carrito.length > 1 ? 's' : ''})` : ''}</>
                   )}
                 </button>
               </motion.div>

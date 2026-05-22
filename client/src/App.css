@@ -50,7 +50,9 @@
 }
 .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .header-title { display: flex; align-items: center; gap: 12px; }
-.header-title .icon { font-size: 28px; }
+.header-title .icon { width: 32px; height: 32px; object-fit: contain; }
+.aceituna-inline { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; }
+.modal-cantidad-icon { width: 32px; height: 32px; object-fit: contain; }
 .header-title h1 {
   font-family: "Playfair Display", serif;
   font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: 0.3px; line-height: 1.1;
@@ -142,7 +144,7 @@
 }
 .producto-card:hover { background: var(--glass-hover); transform: translateX(2px); }
 .producto-card.en-carrito { border-color: rgba(201,168,76,0.45); background: var(--gold-dim); }
-.producto-icon { font-size: 18px; flex-shrink: 0; }
+.producto-icon { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
 .producto-nombre { flex: 1; font-size: 13px; color: var(--text-dim); display: flex; flex-direction: column; gap: 2px; }
 .producto-card.en-carrito .producto-nombre { color: var(--text); }
 .producto-precio { font-size: 13px; font-weight: 700; color: var(--gold); }
