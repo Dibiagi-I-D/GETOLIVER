@@ -84,17 +84,17 @@ export async function getPedidos(req, res) {
     try {
       const r2 = await pool.request().query(`
         SELECT
-          h.FCRMVH_NROFOR                                    AS nrofor,
-          RTRIM(LTRIM(h.FCRMVH_USERID))                     AS nroleg,
-          h.FCRMVH_CODEMP                                    AS empresa,
-          CONVERT(VARCHAR, h.FCRMVH_FCHMOV, 103)             AS fecha,
-          h.FCRMVH_ULTOPR                                    AS status,
-          RTRIM(LTRIM(ISNULL(m.SJMLGH_NOMBRE, 'Sin nombre'))) AS nombre,
-          RTRIM(LTRIM(ISNULL(h.FCRMVH_TEXTOS, '')))         AS observaciones,
-          v.FCRMVI_NROITM                                    AS cuota,
-          RTRIM(LTRIM(ISNULL(v.FCRMVI_ARTCOD, '')))         AS artcod,
-          v.FCRMVI_CANTID                                    AS cantidad,
-          v.FCRMVI_TOTLIN                                    AS impcuo
+          h.FCRMVH_NROFOR                                              AS nrofor,
+          RTRIM(LTRIM(h.FCRMVH_USERID))                               AS nroleg,
+          h.FCRMVH_CODEMP                                              AS empresa,
+          CONVERT(VARCHAR, h.FCRMVH_FCHMOV, 103)                       AS fecha,
+          h.FCRMVH_ULTOPR                                              AS status,
+          RTRIM(LTRIM(ISNULL(m.SJMLGH_NOMBRE, 'Sin nombre')))         AS nombre,
+          RTRIM(LTRIM(ISNULL(CAST(h.FCRMVH_TEXTOS AS VARCHAR(500)), ''))) AS observaciones,
+          v.FCRMVI_NROITM                                              AS cuota,
+          RTRIM(LTRIM(ISNULL(v.FCRMVI_ARTCOD, '')))                   AS artcod,
+          v.FCRMVI_CANTID                                              AS cantidad,
+          v.FCRMVI_TOTLIN                                              AS impcuo
         FROM FCRMVH h
         LEFT JOIN SJMLGH m
           ON RTRIM(LTRIM(m.SJMLGH_NROLEG)) = RTRIM(LTRIM(h.FCRMVH_USERID))
@@ -106,8 +106,8 @@ export async function getPedidos(req, res) {
           AND v.FCRMVI_NROFOR = h.FCRMVH_NROFOR
         WHERE h.FCRMVH_CODFOR = 'NPI'
           AND h.FCRMVH_CODEMP = '${empresa}'
-          AND h.FCRMVH_TEXTOS NOT LIKE '%Bono%'
-          AND RTRIM(LTRIM(h.FCRMVH_NROCTA)) = '417'
+          AND CAST(h.FCRMVH_TEXTOS AS VARCHAR(500)) NOT LIKE '%Bono%'
+          AND RTRIM(LTRIM(CAST(h.FCRMVH_NROCTA AS VARCHAR(50)))) = '417'
         ORDER BY h.FCRMVH_NROFOR DESC, v.FCRMVI_NROITM ASC
       `);
 
