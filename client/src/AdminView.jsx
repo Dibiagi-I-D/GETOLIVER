@@ -81,8 +81,10 @@ const numeroALetras = (num) => {
 // Extrae el método de pago legible desde el campo observaciones
 const extraerMetodoPago = (observaciones) => {
   if (!observaciones) return '';
-  if (observaciones.toLowerCase().includes('bono')) return 'Descuento por Bono';
-  if (observaciones.toLowerCase().includes('empleado')) return 'Empleado (efectivo/transferencia)';
+  const obs = observaciones.toLowerCase();
+  if (obs.includes('bono')) return 'Descuento por Bono';
+  if (obs.includes('empleado') || obs.includes('efectivo') || obs.includes('transferencia'))
+    return 'Efectivo / Transferencia';
   return observaciones;
 };
 
@@ -344,18 +346,21 @@ function AdminView() {
   };
 
   const confirmarEntrega = (pedido) => {
-    setConfirm({ nrofor: pedido.nrofor, nombre: pedido.nombre });
+    setConfirm({ nrofor: pedido.nrofor, nombre: pedido.nombre, tipo: pedido.tipo });
   };
 
   const ejecutarEntrega = async () => {
-    const { nrofor } = confirm;
+    const { nrofor, tipo } = confirm;
+    const entregandoKey = `${tipo}-${nrofor}`;
     setConfirm(null);
-    setEntregando(nrofor);
+    setEntregando(entregandoKey);
     try {
-      const res = await axios.post(`${API_BASE}/api/admin/marcar-entregado`, { nrofor, empresa });
+      const res = await axios.post(`${API_BASE}/api/admin/marcar-entregado`, { nrofor, empresa, tipo });
       if (res.data.success) {
         setPedidos((prev) =>
-          prev.map((p) => p.nrofor === nrofor ? { ...p, status: 'E' } : p)
+          prev.map((p) =>
+            p.nrofor === nrofor && p.tipo === tipo ? { ...p, status: 'E' } : p
+          )
         );
       }
     } catch (err) {
@@ -604,11 +609,11 @@ function AdminView() {
         <div className="pedidos-grid">
           {pedidosFiltrados.map((pedido) => {
             const esEntregado = pedido.status === 'E';
-            const enProceso   = entregando === pedido.nrofor;
+            const enProceso   = entregando === `${pedido.tipo}-${pedido.nrofor}`;
 
             return (
               <div
-                key={pedido.nrofor}
+                key={`${pedido.tipo}-${pedido.nrofor}`}
                 className={`pedido-card ${esEntregado ? 'entregado' : ''}`}
               >
                 <div
