@@ -51,36 +51,6 @@ export async function getPedidos(req, res) {
       ORDER BY h.SJTPAH_NROFOR DESC, i.SJTPAI_CUOTAS ASC
     `);
 
-    // ── Query 2: pedidos empleado (FCRMVH/FCRMVI, excluyendo bono) ───────────
-    const r2 = await pool.request().query(`
-      SELECT
-        h.FCRMVH_NROFOR                                    AS nrofor,
-        RTRIM(LTRIM(h.FCRMVH_USERID))                     AS nroleg,
-        h.FCRMVH_CODEMP                                    AS empresa,
-        CONVERT(VARCHAR, h.FCRMVH_FCHMOV, 103)             AS fecha,
-        h.FCRMVH_ULTOPR                                    AS status,
-        RTRIM(LTRIM(ISNULL(m.SJMLGH_NOMBRE, 'Sin nombre'))) AS nombre,
-        RTRIM(LTRIM(ISNULL(h.FCRMVH_TEXTOS, '')))         AS observaciones,
-        v.FCRMVI_NROITM                                    AS cuota,
-        RTRIM(LTRIM(ISNULL(v.FCRMVI_ARTCOD, '')))         AS artcod,
-        v.FCRMVI_CANTID                                    AS cantidad,
-        v.FCRMVI_TOTLIN                                    AS impcuo
-      FROM FCRMVH h
-      LEFT JOIN SJMLGH m
-        ON RTRIM(LTRIM(m.SJMLGH_NROLEG)) = RTRIM(LTRIM(h.FCRMVH_USERID))
-        AND m.SJMLGH_CODEMP = h.FCRMVH_CODEMP
-      LEFT JOIN FCRMVI v
-        ON v.FCRMVI_CODEMP = h.FCRMVH_CODEMP
-        AND v.FCRMVI_MODFOR = h.FCRMVH_MODFOR
-        AND v.FCRMVI_CODFOR = h.FCRMVH_CODFOR
-        AND v.FCRMVI_NROFOR = h.FCRMVH_NROFOR
-      WHERE h.FCRMVH_CODFOR = 'NPI'
-        AND h.FCRMVH_CODEMP = '${empresa}'
-        AND h.FCRMVH_TEXTOS NOT LIKE '%Bono%'
-        AND RTRIM(LTRIM(h.FCRMVH_NROCTA)) = '417'
-      ORDER BY h.FCRMVH_NROFOR DESC, v.FCRMVI_NROITM ASC
-    `);
-
     // ── Agrupar bono orders ───────────────────────────────────────────────────
     const polivaMap = new Map();
     for (const row of r1.recordset) {
@@ -108,40 +78,74 @@ export async function getPedidos(req, res) {
       }
     }
 
-    // ── Agrupar empleado orders ───────────────────────────────────────────────
+    // ── Query 2: pedidos empleado (FCRMVH/FCRMVI) ────────────────────────────
+    // Si falla este query, los pedidos bono igual se devuelven
     const npiMap = new Map();
-    for (const row of r2.recordset) {
-      const key = row.nrofor;
-      if (!npiMap.has(key)) {
-        npiMap.set(key, {
-          tipo:          'NPI',
-          nrofor:        row.nrofor,
-          nroleg:        row.nroleg,
-          empresa:       row.empresa,
-          fecha:         row.fecha,
-          status:        row.status,  // 'A' = pendiente, 'E' = entregado
-          importeTotal:  0,
-          nombre:        row.nombre,
-          observaciones: row.observaciones || '',
-          items:         [],
-        });
-      }
+    try {
+      const r2 = await pool.request().query(`
+        SELECT
+          h.FCRMVH_NROFOR                                    AS nrofor,
+          RTRIM(LTRIM(h.FCRMVH_USERID))                     AS nroleg,
+          h.FCRMVH_CODEMP                                    AS empresa,
+          CONVERT(VARCHAR, h.FCRMVH_FCHMOV, 103)             AS fecha,
+          h.FCRMVH_ULTOPR                                    AS status,
+          RTRIM(LTRIM(ISNULL(m.SJMLGH_NOMBRE, 'Sin nombre'))) AS nombre,
+          RTRIM(LTRIM(ISNULL(h.FCRMVH_TEXTOS, '')))         AS observaciones,
+          v.FCRMVI_NROITM                                    AS cuota,
+          RTRIM(LTRIM(ISNULL(v.FCRMVI_ARTCOD, '')))         AS artcod,
+          v.FCRMVI_CANTID                                    AS cantidad,
+          v.FCRMVI_TOTLIN                                    AS impcuo
+        FROM FCRMVH h
+        LEFT JOIN SJMLGH m
+          ON RTRIM(LTRIM(m.SJMLGH_NROLEG)) = RTRIM(LTRIM(h.FCRMVH_USERID))
+          AND m.SJMLGH_CODEMP = h.FCRMVH_CODEMP
+        LEFT JOIN FCRMVI v
+          ON v.FCRMVI_CODEMP = h.FCRMVH_CODEMP
+          AND v.FCRMVI_MODFOR = h.FCRMVH_MODFOR
+          AND v.FCRMVI_CODFOR = h.FCRMVH_CODFOR
+          AND v.FCRMVI_NROFOR = h.FCRMVH_NROFOR
+        WHERE h.FCRMVH_CODFOR = 'NPI'
+          AND h.FCRMVH_CODEMP = '${empresa}'
+          AND h.FCRMVH_TEXTOS NOT LIKE '%Bono%'
+          AND RTRIM(LTRIM(h.FCRMVH_NROCTA)) = '417'
+        ORDER BY h.FCRMVH_NROFOR DESC, v.FCRMVI_NROITM ASC
+      `);
 
-      if (row.cuota != null) {
-        const artcodNum  = String(row.artcod).trim();
-        const nombre     = ARTCOD_A_NOMBRE[artcodNum] || `Producto ${artcodNum}`;
-        const cantNum    = parseFloat(row.cantidad) || 1;
-        const impcuo     = parseFloat(row.impcuo)   || 0;
-        const precioUnit = cantNum > 0 ? impcuo / cantNum : impcuo;
-        const precioFmt  = precioUnit.toLocaleString('es-AR', { minimumFractionDigits: 2 });
+      for (const row of r2.recordset) {
+        const key = row.nrofor;
+        if (!npiMap.has(key)) {
+          npiMap.set(key, {
+            tipo:          'NPI',
+            nrofor:        row.nrofor,
+            nroleg:        row.nroleg,
+            empresa:       row.empresa,
+            fecha:         row.fecha,
+            status:        row.status,  // 'A'=pendiente, 'E'=entregado
+            importeTotal:  0,
+            nombre:        row.nombre,
+            observaciones: row.observaciones || '',
+            items:         [],
+          });
+        }
 
-        npiMap.get(key).items.push({
-          cuota:  row.cuota,
-          motivo: `${nombre} - Cant: ${cantNum} x $${precioFmt}`,
-          impcuo,
-        });
-        npiMap.get(key).importeTotal += impcuo;
+        if (row.cuota != null) {
+          const artcodNum  = String(row.artcod).trim();
+          const nombre     = ARTCOD_A_NOMBRE[artcodNum] || `Producto ${artcodNum}`;
+          const cantNum    = parseFloat(row.cantidad) || 1;
+          const impcuo     = parseFloat(row.impcuo)   || 0;
+          const precioUnit = cantNum > 0 ? impcuo / cantNum : impcuo;
+          const precioFmt  = precioUnit.toLocaleString('es-AR', { minimumFractionDigits: 2 });
+
+          npiMap.get(key).items.push({
+            cuota:  row.cuota,
+            motivo: `${nombre} - Cant: ${cantNum} x $${precioFmt}`,
+            impcuo,
+          });
+          npiMap.get(key).importeTotal += impcuo;
+        }
       }
+    } catch (npiErr) {
+      console.error('⚠ Error al obtener pedidos NPI (se omiten):', npiErr.message);
     }
 
     // ── Combinar y ordenar por fecha más reciente primero ────────────────────
