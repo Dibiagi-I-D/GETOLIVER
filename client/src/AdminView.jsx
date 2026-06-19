@@ -283,7 +283,7 @@ const compartirViaWhatsApp = async (archivo) => {
   a.download = archivo.name;
   a.click();
   URL.revokeObjectURL(url);
-  setTimeout(() => window.open(`https://wa.me/${WHATSAPP_NUMBER}`, '_blank'), 400);
+  setTimeout(() => window.open(`https://web.whatsapp.com/send?phone=${WHATSAPP_NUMBER}`, '_blank'), 400);
 };
 
 const descargarYEnviar = (pedido) => {
