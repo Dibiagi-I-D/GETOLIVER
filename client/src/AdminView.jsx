@@ -317,13 +317,14 @@ const descargarTodosYEnviar = async (pedidos) => {
 };
 
 function AdminView() {
-  const [empresa, setEmpresa]       = useState('FP');
-  const [pedidos, setPedidos]       = useState([]);
-  const [filtro, setFiltro]         = useState('pendientes');
-  const [loading, setLoading]       = useState(false);
-  const [confirm, setConfirm]       = useState(null);
-  const [entregando, setEntregando] = useState(null);
-  const [detalle, setDetalle]       = useState(null);
+  const [empresa, setEmpresa]         = useState('FP');
+  const [pedidos, setPedidos]         = useState([]);
+  const [filtro, setFiltro]           = useState('pendientes');
+  const [filtroTipo, setFiltroTipo]   = useState('todos');
+  const [loading, setLoading]         = useState(false);
+  const [confirm, setConfirm]         = useState(null);
+  const [entregando, setEntregando]   = useState(null);
+  const [detalle, setDetalle]         = useState(null);
   const [descargando, setDescargando] = useState(false);
 
   const [fechaDesde, setFechaDesde] = useState('');
@@ -370,30 +371,40 @@ function AdminView() {
     }
   };
 
-  const pedidosFiltrados = pedidos.filter((p) => {
-    const esEntregado = p.status === 'E';
+  const pedidosFiltrados = (() => {
+    let lista = pedidos.filter((p) => {
+      const esEntregado = p.status === 'E';
 
-    if (filtro === 'pendientes') return !esEntregado;
+      if (filtro === 'pendientes' && esEntregado) return false;
 
-    if (filtro === 'entregados') {
-      if (!esEntregado) return false;
-      const fechaPedido = parseFechaDDMMYYYY(p.fecha);
-      if (fechaDesde && fechaPedido) {
-        if (fechaPedido < new Date(fechaDesde)) return false;
+      if (filtro === 'entregados') {
+        if (!esEntregado) return false;
+        const fechaPedido = parseFechaDDMMYYYY(p.fecha);
+        if (fechaDesde && fechaPedido && fechaPedido < new Date(fechaDesde)) return false;
+        if (fechaHasta && fechaPedido) {
+          const hasta = new Date(fechaHasta);
+          hasta.setHours(23, 59, 59);
+          if (fechaPedido > hasta) return false;
+        }
       }
-      if (fechaHasta && fechaPedido) {
-        const hasta = new Date(fechaHasta);
-        hasta.setHours(23, 59, 59);
-        if (fechaPedido > hasta) return false;
-      }
+
+      if (filtroTipo === 'bono')     return p.tipo === 'POLIVA';
+      if (filtroTipo === 'empleado') return p.tipo === 'NPI';
       return true;
+    });
+
+    // Cuando se filtra por tipo, ordenar por N° de pedido desc dentro de ese tipo
+    if (filtroTipo !== 'todos') {
+      lista = [...lista].sort((a, b) => b.nrofor - a.nrofor);
     }
 
-    return true;
-  });
+    return lista;
+  })();
 
   const totalPendientes = pedidos.filter((p) => p.status !== 'E').length;
   const totalEntregados = pedidos.filter((p) => p.status === 'E').length;
+  const totalBono       = pedidos.filter((p) => p.tipo === 'POLIVA').length;
+  const totalEmpleado   = pedidos.filter((p) => p.tipo === 'NPI').length;
   const pendientesFiltrados = pedidosFiltrados.filter((p) => p.status !== 'E');
 
   const handleDescargarTodos = async () => {
@@ -520,7 +531,7 @@ function AdminView() {
         </button>
       </div>
 
-      {/* Filtros */}
+      {/* Filtros estado */}
       <div className="admin-filtros">
         <button
           className={`btn-filtro ${filtro === 'pendientes' ? 'activo' : ''}`}
@@ -533,6 +544,29 @@ function AdminView() {
           onClick={() => setFiltro('entregados')}
         >
           ✅ Entregados ({totalEntregados})
+        </button>
+      </div>
+
+      {/* Filtros tipo de pedido */}
+      <div className="admin-filtros-tipo">
+        <span className="filtros-tipo-label">Tipo:</span>
+        <button
+          className={`btn-filtro-tipo ${filtroTipo === 'todos' ? 'activo' : ''}`}
+          onClick={() => setFiltroTipo('todos')}
+        >
+          Todos ({pedidos.length})
+        </button>
+        <button
+          className={`btn-filtro-tipo ${filtroTipo === 'bono' ? 'activo' : ''}`}
+          onClick={() => setFiltroTipo('bono')}
+        >
+          🔖 Bono ({totalBono})
+        </button>
+        <button
+          className={`btn-filtro-tipo ${filtroTipo === 'empleado' ? 'activo' : ''}`}
+          onClick={() => setFiltroTipo('empleado')}
+        >
+          💵 Empleado ({totalEmpleado})
         </button>
       </div>
 
@@ -627,6 +661,10 @@ function AdminView() {
                       <span>Leg. {pedido.nroleg}</span>
                       <span>📅 {pedido.fecha}</span>
                       <span>N°{pedido.nrofor}</span>
+                      {pedido.tipo === 'POLIVA'
+                        ? <span className="badge-tipo badge-bono">🔖 Bono</span>
+                        : <span className="badge-tipo badge-empleado">💵 Empleado</span>
+                      }
                     </span>
                   </div>
                   {esEntregado

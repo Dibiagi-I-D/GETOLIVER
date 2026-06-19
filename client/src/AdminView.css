@@ -36,6 +36,26 @@
 .btn-filtro:hover { background: var(--glass-hover); color: var(--text); }
 .btn-filtro.activo { background: var(--gold-dim); border-color: rgba(201,168,76,0.5); color: var(--gold-light); font-weight: 600; }
 
+/* FILTROS TIPO */
+.admin-filtros-tipo {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.filtros-tipo-label {
+  font-size: 11px; font-weight: 600; color: var(--text-faint);
+  text-transform: uppercase; letter-spacing: 0.8px; margin-right: 2px;
+}
+.btn-filtro-tipo {
+  padding: 5px 14px; border-radius: 14px; border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.04); color: var(--text-dim);
+  font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: "Inter", sans-serif;
+}
+.btn-filtro-tipo:hover { background: var(--glass-hover); color: var(--text); }
+.btn-filtro-tipo.activo {
+  background: rgba(60,130,180,0.2); border-color: rgba(60,130,180,0.5);
+  color: #7ec8e3; font-weight: 600;
+}
+
 /* FILTRO FECHAS */
 .filtro-fechas {
   background: var(--glass-bg); border: 1px solid var(--glass-border);
@@ -100,6 +120,19 @@
   background: rgba(107,142,35,0.2); color: #9ddc6a;
   border: 1px solid rgba(107,142,35,0.4); border-radius: 10px;
   padding: 3px 10px; font-size: 11px; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+}
+
+.badge-tipo {
+  display: inline-block; padding: 2px 8px; border-radius: 10px;
+  font-size: 10px; font-weight: 600; white-space: nowrap;
+}
+.badge-bono {
+  background: rgba(201,168,76,0.15); color: var(--gold-light);
+  border: 1px solid rgba(201,168,76,0.3);
+}
+.badge-empleado {
+  background: rgba(60,180,130,0.15); color: #6ddbb8;
+  border: 1px solid rgba(60,180,130,0.3);
 }
 
 .pedido-items { padding: 10px 16px; display: flex; flex-direction: column; gap: 5px; flex: 1; cursor: pointer; }
