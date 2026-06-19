@@ -428,7 +428,7 @@ export async function insertarPedidoAceite(req, res) {
     res.json({
       success: true,
       message: 'Pedido registrado correctamente',
-      nrofor: nroFor,
+      nrofor: metodoPago === 'bono' ? nroFor : nroNPI,
       insertados: itemsInsertados.length,
       metodoPago,
       productos: itemsInsertados,

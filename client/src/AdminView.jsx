@@ -320,7 +320,7 @@ function AdminView() {
   const [empresa, setEmpresa]         = useState('FP');
   const [pedidos, setPedidos]         = useState([]);
   const [filtro, setFiltro]           = useState('pendientes');
-  const [filtroTipo, setFiltroTipo]   = useState('todos');
+  const [filtroTipo, setFiltroTipo]   = useState('bono');
   const [loading, setLoading]         = useState(false);
   const [confirm, setConfirm]         = useState(null);
   const [entregando, setEntregando]   = useState(null);
@@ -393,10 +393,8 @@ function AdminView() {
       return true;
     });
 
-    // Cuando se filtra por tipo, ordenar por N° de pedido desc dentro de ese tipo
-    if (filtroTipo !== 'todos') {
-      lista = [...lista].sort((a, b) => b.nrofor - a.nrofor);
-    }
+    // Ordenar por N° de pedido desc dentro del tipo seleccionado
+    lista = [...lista].sort((a, b) => b.nrofor - a.nrofor);
 
     return lista;
   })();
@@ -547,27 +545,17 @@ function AdminView() {
         </button>
       </div>
 
-      {/* Filtros tipo de pedido */}
+      {/* Filtro tipo de pedido */}
       <div className="admin-filtros-tipo">
-        <span className="filtros-tipo-label">Tipo:</span>
-        <button
-          className={`btn-filtro-tipo ${filtroTipo === 'todos' ? 'activo' : ''}`}
-          onClick={() => setFiltroTipo('todos')}
+        <span className="filtros-tipo-label">Tipo de pago:</span>
+        <select
+          className="select-filtro-tipo"
+          value={filtroTipo}
+          onChange={(e) => setFiltroTipo(e.target.value)}
         >
-          Todos ({pedidos.length})
-        </button>
-        <button
-          className={`btn-filtro-tipo ${filtroTipo === 'bono' ? 'activo' : ''}`}
-          onClick={() => setFiltroTipo('bono')}
-        >
-          🔖 Bono ({totalBono})
-        </button>
-        <button
-          className={`btn-filtro-tipo ${filtroTipo === 'empleado' ? 'activo' : ''}`}
-          onClick={() => setFiltroTipo('empleado')}
-        >
-          💵 Empleado ({totalEmpleado})
-        </button>
+          <option value="bono">🔖 Bono ({totalBono})</option>
+          <option value="empleado">💵 Empleado ({totalEmpleado})</option>
+        </select>
       </div>
 
       {/* Filtro de fechas — solo visible en Entregados */}
